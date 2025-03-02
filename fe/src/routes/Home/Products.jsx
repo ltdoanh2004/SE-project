@@ -20,7 +20,11 @@ const products = [
 	{
 		name: 'Nhẫn',
 		img: 'https://cdn.pnj.io/images/detailed/82/gndrwb74179.106-nhan-pnj-vang-trang-10k-dinh-da-ecz-01a.png',
+<<<<<<< HEAD
 	}
+=======
+	},
+>>>>>>> 3be7f89 (update fe)
 ]
 
 const Product = ({ product }) => (
@@ -33,7 +37,11 @@ const Product = ({ product }) => (
 			/>
 		</div>
 		<div className="absolute flex justify-between items-center w-full bottom-1 p-1 text-gray-800 overflow-hidden">
+<<<<<<< HEAD
 			<h5 className='pb-5 pl-5'>{product.name}</h5>
+=======
+			<h5 className="pb-5 pl-5">{product.name}</h5>
+>>>>>>> 3be7f89 (update fe)
 		</div>
 	</div>
 )
@@ -81,10 +89,16 @@ export default function Products() {
 				<h1 className="text-2xl font-normal text-yellow-600">
 					Top Accessories
 				</h1>
+<<<<<<< HEAD
         <h2 className="md:text-lg text-sm text-gray-500 tracking-wider">
     Enim praesent elementum facilisis leo vel
 </h2>
 
+=======
+				<h2 className="md:text-lg text-sm text-gray-500 tracking-wider">
+					Enim praesent elementum facilisis leo vel
+				</h2>
+>>>>>>> 3be7f89 (update fe)
 			</div>
 			<Slider {...settings}>
 				{products.map((product, index) => (

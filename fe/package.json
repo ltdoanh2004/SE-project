@@ -13,6 +13,10 @@
 		"@react-three/drei": "^9.83.9",
 		"@react-three/fiber": "^8.14.1",
 		"@reduxjs/toolkit": "^2.2.1",
+<<<<<<< HEAD
+=======
+		"antd": "^5.24.1",
+>>>>>>> 3be7f89 (update fe)
 		"axios": "^1.6.7",
 		"dotenv": "^16.4.5",
 		"framer-motion": "^11.0.6",
