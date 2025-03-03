@@ -12,7 +12,8 @@ const ProductPage = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
+    <div className="w-full max-w-screen-xl mx-auto p-6">
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Hình ảnh sản phẩm */}
         <div className="w-full h-80 flex items-center justify-center">
@@ -52,7 +53,11 @@ const ProductPage = () => {
 
 
           {/* Giá sản phẩm */}
-          <p className="text-xl font-semibold mt-4">9.700.000 VND</p>
+          <div className="text-xl font-semibold mt-4">
+  <span className="text-gray-500 line-through mr-2">9.700.000 VND</span>
+  <span className="text-red-600 font-bold">8.500.000 VND</span>
+</div>
+
 
           {/* Tăng giảm số lượng */}
           <div className="flex items-center space-x-4 mt-4">
