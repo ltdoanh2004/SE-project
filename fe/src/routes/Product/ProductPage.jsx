@@ -12,11 +12,12 @@ const ProductPage = () => {
   };
 
   return (
-    <div className="w-full max-w-screen-xl mx-auto p-6">
+    <div className="w-full max-w-screen-xl mx-auto p-6 min-h-screen">
+
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Hình ảnh sản phẩm */}
-        <div className="w-full h-80 flex items-center justify-center">
+        <div className="w-full h-[600px] flex items-center justify-center bg-gray-100">
   <img src={RingImage} alt="Chiếc nhẫn vàng" className="w-full h-full object-contain" />
 </div>
 
@@ -29,13 +30,16 @@ const ProductPage = () => {
 
           {/* Chọn size */}
           <div className="mt-4">
-  <span className="text-gray-600">Size:</span>
+          <span className="px-6 py-3 w-20 h-8 flex items-center justify-center bg-[rgba(242,219,169,1)] text-black rounded-full">
+  Size
+</span>
+
   <div className="flex space-x-2 mt-2">
     {[5, 6, 7, 8, 9].map((size) => (
       <button
         key={size}
         onClick={() => setSelectedSize(size)}
-        className={`px-4 py-2 border rounded-md ${
+        className={`px-8 py-0 border rounded-3xl ${
           selectedSize === size
             ? "text-white"
             : "bg-gray-100 text-gray-700"
@@ -53,14 +57,12 @@ const ProductPage = () => {
 
 
           {/* Giá sản phẩm */}
-          <div className="text-xl font-semibold mt-4">
-  <span className="text-gray-500 line-through mr-2">9.700.000 VND</span>
-  <span className="text-red-600 font-bold">8.500.000 VND</span>
-</div>
+          <p className="text-xl font-semibold mt-4">9.700.000 VND</p>
+
 
 
           {/* Tăng giảm số lượng */}
-          <div className="flex items-center space-x-4 mt-4">
+          <div className="flex items-center space-x-4 mt-4 ">
             <button
               onClick={handleDecrease}
               className="px-3 py-1 border rounded-md"
@@ -78,10 +80,10 @@ const ProductPage = () => {
 
           {/* Nút mua hàng */}
           <div className="mt-4">
-            <button className="w-full bg-gray-200 py-2 rounded-md font-semibold">
+            <button className="w-full bg-gray-200 py-2 rounded-md">
               Thêm vào giỏ hàng
             </button>
-            <button className="w-full text-white py-2 rounded-md font-semibold mt-2" 
+            <button className="w-full text-white py-2 rounded-md mt-2" 
             style={{ backgroundColor: "rgba(242, 219, 169, 1)", color: "#000" }}>
               Mua ngay
             </button>
