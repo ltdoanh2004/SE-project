@@ -11,7 +11,9 @@ import Jewelry from './routes/Jewelry'
 
 // Import error pages
 import NotFound from './routes/NotFound'
-import ProductPage from './routes/Product/ProductPage'
+
+import FilterSidebar from './routes/Home/ProductList'
+
 
 // Import transitions
 
@@ -24,7 +26,8 @@ export default function AnimatedRoutes() {
 			<Route path="/account" element={<Login />} />
 			<Route path="/register" element={<Register />} />
 			<Route path="/cart" element={<Shop />} />
-			<Route path="/product/detail/:id" element={<ProductPage />} />
+			<Route path="/jewelry/:product_type" element={<FilterSidebar/>} />
+
 			{/* <Route path="/about" element={<About />} /> */}
 			{/* <Route path="/contact" element={<Contact />} /> */}
 
