@@ -129,7 +129,7 @@ const FilterSidebar = () => {
 	}
 
 	return (
-		<div className="container-products">
+		<div className="flex flex-row justify-around px-40 my-20">
 			<div className="filter-sidebar">
 				<Collapse activeKey={activePanels} onChange={setActivePanels}>
 					<Panel header="Loại" key="1">
@@ -201,23 +201,23 @@ const FilterSidebar = () => {
 				</Collapse>
 				<div style={{ display: 'flex', justifyContent: 'space-around' }}>
 					<Button
+					className='bg-inherit '
 						onClick={resetFilters}
 						style={{
 							marginTop: '10px',
 							marginLeft: '10px',
 							width: '100px',
-							backgroundColor: 'gray',
 						}}
 					>
 						Đặt lại
 					</Button>
 					<Button
+					className='bg-primary hover:!bg-secondary text-black'
 						type="primary"
 						onClick={applyFilters}
 						style={{
 							marginTop: '10px',
 							width: '100px',
-							backgroundColor: '#C48C46',
 						}}
 					>
 						Lọc
@@ -253,7 +253,7 @@ const FilterSidebar = () => {
 								{product.price.toLocaleString()} VND
 							</p>
 							<Button
-								style={{ backgroundColor: '#C48C46', margin: '10px 0' }}
+								className='bg-primary hover:!bg-secondary text-black'
 								type="primary"
 							>
 								Thêm vào giỏ hàng

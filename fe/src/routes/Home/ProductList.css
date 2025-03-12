@@ -8,6 +8,7 @@
 
 .filter-sidebar {
     width: 20%;
+    height: fit-content;
     border: 1px solid #ddd;
     padding: 10px;
     border-radius: 5px;
