@@ -1,71 +1,54 @@
-import Admin from "../models/Admin.js";
 import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
+import User from "../models/User.js";
+import Admin from "../models/Admin.js";
 
-// 1️⃣ Đăng nhập admin
-export const adminLogin = async (req, res) => {
+//tạo tài khoản admin
+export const register = async (req, res) => {
     try {
-        const { email, password } = req.body;
-
-        // Kiểm tra admin có tồn tại không
-        const admin = await Admin.findOne({ where: { email } });
-        if (!admin) {
-            return res.status(404).json({ message: "Admin not found" });
+        const { email, password, userName, phoneNumber ,bankAccountNumber, bank} = req.body;
+    
+        // Kiểm tra email đã tồn tại chưa
+        const existingUser = await User.findOne({ where: { email } });
+        if (existingUser) {
+            return res.status(400).json({ message: "Email already exists" });
         }
-
-        // Kiểm tra mật khẩu
-        const isMatch = await bcrypt.compare(password, admin.password);
-        if (!isMatch) {
-            return res.status(401).json({ message: "Invalid credentials" });
-        }
-
-        // Tạo JWT token
-        const token = jwt.sign(
-            { userID: admin.userID, email: admin.email, role: "admin" },
-            process.env.JWT_SECRET,
-            { expiresIn: "2h" }
-        );
-
-        res.json({ accessToken: token, role: "admin" });
-    } catch (error) {
-        console.error("Admin Login Error:", error);
-        res.status(500).json({ message: "Server error" });
-    }
-};
-
-// 2️⃣ Lấy thông tin admin
-export const getAdminInfo = async (req, res) => {
-    try {
-        const authHeader = req.headers["authorization"];
-        if (!authHeader) {
-            return res.status(401).json({ message: "Token required" });
-        }
-
-        const token = authHeader.split(" ")[1];
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        
-        // Kiểm tra admin trong database
-        const admin = await Admin.findOne({ where: { userID: decoded.userID } });
-        if (!admin) {
-            return res.status(404).json({ message: "Admin not found" });
-        }
-
-        res.json({ userID: admin.userID, email: admin.email, role: "admin" });
-    } catch (error) {
-        console.error("Get Admin Info Error:", error);
-        res.status(403).json({ message: "Invalid or expired token" });
-    }
-};
-
-// 3️⃣ Danh sách tất cả admin
-export const getAllAdmins = async (req, res) => {
-    try {
-        const admins = await Admin.findAll({
-            attributes: ["userID", "email"],
+    
+        // Mã hóa mật khẩu (vì đã mã hóa trong model nên không cần)
+        // const hashedPassword = await bcrypt.hash(password, 10);
+    
+        // Tạo user mới với role "admin"
+        const newUser = await User.create({
+            email,
+            password,
+            userName,
+            phoneNumber,
+            role: "admin",
         });
-        res.json(admins);
+    
+        console.log(newUser.userID);
+        // Tạo adminvới cùng userID
+        await Admin.create({
+            userID: newUser.userID,
+            bankAccountNumber,
+            bank,
+        });
+    
+        // Tạo token
+        const token = jwt.sign({ userID: newUser.userID, email: newUser.email, role: newUser.role }, process.env.JWT_SECRET, {
+            expiresIn: "24h",
+        });
+    
+        // Trả về kết quả
+        res.status(201).json({
+            token,
+            user: {
+                userId: newUser.userID,
+                userName: newUser.userName,
+            }
+        })
+    
     } catch (error) {
-        console.error("Get All Admins Error:", error);
+        console.error("Registration Error:", error);
         res.status(500).json({ message: "Server error" });
     }
 };

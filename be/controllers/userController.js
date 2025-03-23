@@ -49,7 +49,7 @@ export const login = async (req, res) => {
         // Kiểm tra email có tồn tại không
         const user = await User.findOne({ where: { email } });
         if (!user) {
-        return res.status(401).json({ message: "Email or Password is incorrect" });
+            return res.status(401).json({ message: "Email or Password is incorrect" });
         }
 
         // So sánh mật khẩu đã mã hóa
@@ -65,8 +65,14 @@ export const login = async (req, res) => {
             { expiresIn: "24h" }
         );
 
-        // Gửi phản hồi kèm json + role
-        res.json({ accessToken: token, role: user.role });
+        // Trả về kết quả theo format yêu cầu của frontend
+        res.status(201).json({
+            token,
+            user: {
+                userId: user.userID,
+                userName: user.userName,
+            }
+        });
 
     } catch (error) {
         console.error("Login Error:", error);
@@ -74,7 +80,7 @@ export const login = async (req, res) => {
     }
 };
 
-// Đăng ký tài khoản
+// Đăng ký lấy lại mật khẩu
 export const forgetPassword = async (req, res) => {
     try {
         const { email } = req.body;
@@ -126,7 +132,7 @@ export const forgetPassword = async (req, res) => {
 export const resetPassword = async (req, res) => {
     try {
         const { token } = req.query;
-        if (!token) {
+        if (!token || token === "null") {
             return res.send(`
                 <html>
                     <body>
@@ -144,9 +150,8 @@ export const resetPassword = async (req, res) => {
         // Tạo mật khẩu mới ngẫu nhiên
         const newPassword = crypto.randomBytes(6).toString("hex");
     
-        // Cập nhật mật khẩu trong DB (mã hóa trước khi lưu)
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
-        await User.update({ password: hashedPassword }, { where: { email } });
+        // Cập nhật mật khẩu trong DB 
+        await User.update({ password: newPassword}, { where: { email } });
     
         // Gửi mật khẩu mới qua email
         const mailOptions = {
@@ -155,6 +160,9 @@ export const resetPassword = async (req, res) => {
             subject: "Your new password",
             text: `Your new password is: ${newPassword}`,
         };
+
+        console.log("newPassword:",
+        newPassword);
     
         await transporter.sendMail(mailOptions);
 
@@ -207,62 +215,25 @@ export const register = async (req, res) => {
             role: "customer",
         });
     
-        console.log(newUser.userID);
         // Tạo customer với cùng userID
         await Customer.create({
             userID: newUser.userID,
             address,
         });
     
-        // Định sao khi tạo gửi token để đăng nhập luôn nhưng hơi kỳ
-        // const token = jwt.sign({ userID: newUser.userID, email: newUser.email, role: newUser.role }, process.env.JWT_SECRET, {
-        //     expiresIn: "5h",
-        // });
-    
-        res.status(201).json({ message: "User registered successfully"});
-    
-    } catch (error) {
-        console.error("Registration Error:", error);
-        res.status(500).json({ message: "Server error" });
-    }
-};
-
-//tạo tài khoản admin
-export const registerAdmin = async (req, res) => {
-    try {
-        const { email, password, userName, phoneNumber, bankAccountNumber, bank} = req.body;
-    
-        // Kiểm tra email đã tồn tại chưa
-        const existingUser = await User.findOne({ where: { email } });
-        if (existingUser) {
-            return res.status(400).json({ message: "Email already exists" });
-        }
-    
-        // Mã hóa mật khẩu (vì đã mã hóa trong model nên không cần)
-        // const hashedPassword = await bcrypt.hash(password, 10);
-    
-        // Tạo user mới với role "customer"
-        const newUser = await User.create({
-            email,
-            password,
-            userName,
-            phoneNumber,
-            role: "customer",
+        // tạo token
+        const token = jwt.sign({ userID: newUser.userID, email: newUser.email, role: newUser.role }, process.env.JWT_SECRET, {
+            expiresIn: "24h",
         });
     
-        console.log(newUser.userID);
-        // Tạo customer với cùng userID
-        await Customer.create({
-            userID: newUser.userID,
-            address,
+        // Trả về kết quả theo format yêu cầu của frontend
+        res.status(201).json({
+            token,
+            user: {
+                userId: newUser.userID,
+                userName: newUser.userName,
+            }
         });
-    
-        // Định sao khi tạo gửi token để đăng nhập luôn nhưng hơi kỳ
-        // const token = jwt.sign({ userID: newUser.userID, email: newUser.email, role: newUser.role }, process.env.JWT_SECRET, {
-        //     expiresIn: "5h",
-        // });
-    
-        res.status(201).json({ message: "User registered successfully"});
     
     } catch (error) {
         console.error("Registration Error:", error);
@@ -284,7 +255,7 @@ export const getRole = async (req, res) => {
         const token = authHeader.split(" ")[1];
         console.log("Extracted Token:", token);
 
-        if (!token) {
+        if (!token || token === "null") {
             return res.status(403).json({ message: "Invalid token format" });
         }
 
@@ -329,7 +300,7 @@ export const renewToken = async (req, res) => {
         const token = authHeader.split(" ")[1];
         console.log("Extracted Token:", token);
 
-        if (!token) {
+        if (!token || token === "null") {
             return res.status(403).json({ message: "Invalid token format" });
         }
 

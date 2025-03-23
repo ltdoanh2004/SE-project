@@ -4,7 +4,7 @@ import Order from "./Order.js";
 import Product from "./Product.js";
 
 const OrDuct = sequelize.define("OrDuct", {
-  OrderID: {
+  orderID: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {

@@ -1,8 +1,6 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../DB/index.js";
 import User from "./User.js";
-import Product from "./Product.js";
-import Order from "./Order.js";
 
 const Admin = sequelize.define("Admin", {
   userID: {
@@ -29,8 +27,5 @@ const Admin = sequelize.define("Admin", {
 
 User.hasOne(Admin, { foreignKey: "userID" });
 Admin.belongsTo(User, { foreignKey: "userID" });
-
-Admin.hasMany(Product, { foreignKey: "adminID" });
-Product.belongsTo(Admin, { foreignKey: "adminID" });
 
 export default Admin;
