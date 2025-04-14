@@ -19,7 +19,8 @@ export default function RegisterPage() {
 	const onSubmit = async (data) => {
 		// This assumes 'data' comes directly from react-hook-form and contains only email and password
 		try {
-			await dispatch(registerUser(data)) // 'data' should already be { email: '', password: '' }
+			console.log(data)
+			// await dispatch(registerUser(data)) // 'data' should already be { email: '', password: '' }
 			navigate('/')
 		} catch (error) {
 			setRegistrationError(error.message)
@@ -43,6 +44,13 @@ export default function RegisterPage() {
 					<h2 className="text-2xl font-semibold text-center text-gray-700 mb-6">
 						Register
 					</h2>
+					<input
+						placeholder="Your Full Name"
+						{...register('fullName', {
+							required: 'Full name is required'
+						})}
+						className="w-full px-4 py-2 border rounded leading-tight focus:outline-none focus:border-primary"
+					/>
 					<input
 						placeholder="Email"
 						{...register('email', {

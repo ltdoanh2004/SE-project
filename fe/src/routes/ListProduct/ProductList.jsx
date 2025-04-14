@@ -79,7 +79,7 @@ const products = [
 	},
 ]
 
-const FilterSidebar = () => {
+const ProductList = () => {
 	const defaultFilters = {
 		type: [],
 		brand: [],
@@ -266,4 +266,4 @@ const FilterSidebar = () => {
 	)
 }
 
-export default FilterSidebar
+export default ProductList
