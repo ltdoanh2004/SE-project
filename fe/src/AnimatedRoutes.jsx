@@ -15,6 +15,7 @@ import NotFound from './routes/NotFound'
 import FilterSidebar from './routes/Home/ProductList'
 import ProductPage from './routes/Product/ProductPage'
 import ConfirmOrderPage from './routes/Order/OrderConfirm'
+import AboutUs from './routes/Shop/AboutUs'
 
 // Import transitions
 
@@ -30,6 +31,8 @@ export default function AnimatedRoutes() {
 			<Route path="/jewelry/:product_type" element={<FilterSidebar/>} />
 			<Route path='/product/:id' element={<ProductPage/>}/>
 			<Route path='/confirm' element={<ConfirmOrderPage/>}/>
+			<Route path='/AboutUs' element={<AboutUs/>}/>
+
 
 
 			{/* <Route path="/about" element={<About />} /> */}
