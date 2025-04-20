@@ -1,9 +1,11 @@
 import React, { useState } from 'react'
 import RingImage from '../../assets/image/NhanVang.png'
+import { useLocation, useRoutes } from 'react-router-dom'
 
 const ProductPage = () => {
 	const [quantity, setQuantity] = useState(1)
 	const [selectedSize, setSelectedSize] = useState(null)
+	const productId = useLocation().pathname.split('/').pop()
 
 	const handleIncrease = () => setQuantity(quantity + 1)
 	const handleDecrease = () => {

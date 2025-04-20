@@ -27,20 +27,20 @@ export default function AnimatedRoutes() {
 			<Route path="/" element={<Home />} />
 			<Route path="/jewelry">
 				<Route index element={<Jewelry />} />
-				<Route path=":listQuery" element={<ProductList />} />
+				<Route path=":sex/:filter/:query" element={<ProductList />} />
 			</Route>
 			<Route path="/account" element={<Login />} />
 			<Route path="/register" element={<Register />} />
-			<Route path="/cart" element={<Shop />} />
+			<Route path="/cart" element={<ProductPage />} />
 			{/* <Route path="/jewelry/:product_type" element={<FilterSidebar/>} /> */}
 			{/* <Route path='/product/:id' element={<ProductPage/>}/> */}
-			<Route path='/confirm' element={<ConfirmOrderPage/>}/>
+			<Route path="/confirm" element={<ConfirmOrderPage />} />
 
 			<Route path="/product">
 				<Route index />
 				<Route path=":productId" element={<ProductPage />} />
 			</Route>
-			<Route path="/admin" >
+			<Route path="/admin">
 				<Route path="order" element={<OrderDashboard />} />
 				<Route path="employee" element={<EmployeeDashboard />} />
 			</Route>

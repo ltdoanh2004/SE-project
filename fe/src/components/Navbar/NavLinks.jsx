@@ -65,8 +65,8 @@ const NavLinks = () => {
 						`}
 					>
 						{/* sublinks */}
-						{link.sublinks.map((slinks) => (
-							<div key={slinks.link}>
+						{link.sublinks.map((slinks, index) => (
+							<div key={index}>
 								<div className="flex items-center">
 									<h1
 										onClick={() =>

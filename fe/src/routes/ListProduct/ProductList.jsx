@@ -1,6 +1,9 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Checkbox, Collapse, Slider, Button, Card } from 'antd'
 import './ProductList.css'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { filter } from 'framer-motion/client'
+import { use } from 'react'
 
 const { Panel } = Collapse
 
@@ -91,6 +94,7 @@ const ProductList = () => {
 	const [filters, setFilters] = useState(defaultFilters)
 	const [filteredProducts, setFilteredProducts] = useState(products)
 	const [activePanels, setActivePanels] = useState([]) // Mặc định tất cả đóng
+	const [currentImage, setCurrentImage] = useState([])
 
 	const handleCheckboxChange = (category, value) => {
 		setFilters((prev) => {
@@ -100,6 +104,20 @@ const ProductList = () => {
 			return { ...prev, [category]: newValues }
 		})
 	}
+
+	const routeFilter = useLocation()
+	useEffect(() => {
+		setFilters((prev) => ({
+			...prev,
+			[routeFilter.pathname.split('/')[3]]: [
+				routeFilter.pathname.split('/')[4],
+			],
+		}))
+	}, [routeFilter.pathname])
+	console.log(filters)
+
+	useEffect(() => {
+		setCurrentImage(products.map((product) => product.image))}, [])
 
 	const handleSliderChange = (value) => {
 		setFilters((prev) => ({ ...prev, price: value }))
@@ -126,6 +144,12 @@ const ProductList = () => {
 	const resetFilters = () => {
 		setFilters(defaultFilters)
 		setFilteredProducts(products)
+	}
+
+	const navigate = useNavigate()
+	const handleClickCard = (product) => {
+		// Navigate to product detail page or perform any action you want
+		navigate(`/product/${product.id}`)
 	}
 
 	return (
@@ -201,7 +225,7 @@ const ProductList = () => {
 				</Collapse>
 				<div style={{ display: 'flex', justifyContent: 'space-around' }}>
 					<Button
-					className='bg-inherit '
+						className="bg-inherit "
 						onClick={resetFilters}
 						style={{
 							marginTop: '10px',
@@ -212,7 +236,7 @@ const ProductList = () => {
 						Đặt lại
 					</Button>
 					<Button
-					className='bg-primary hover:!bg-secondary text-black'
+						className="bg-primary hover:!bg-secondary text-black"
 						type="primary"
 						onClick={applyFilters}
 						style={{
@@ -225,22 +249,30 @@ const ProductList = () => {
 				</div>
 			</div>
 			<div className="product-list">
-				{filteredProducts.map((product) => {
-					const [currentImage, setCurrentImage] = useState(product.image)
-
+				{filteredProducts.map((product, index) => {
 					return (
 						<Card
+							onClick={() => handleClickCard(product)}
 							key={product.id}
 							style={{ width: 350, height: 350, textAlign: 'center' }}
+							className="hover:cursor-pointer"
+							onMouseEnter={() =>
+								setCurrentImage((prev) => ({
+									...prev,
+									[index]: product.hoverImage,
+								}))
+							}
+							onMouseLeave={() =>
+								setCurrentImage((prev) => ({
+									...prev,
+									[index]: product.image,
+								}))
+							}
 						>
 							<img
-								src={currentImage}
+								src={currentImage[index]}
 								alt={product.name}
 								style={{ width: '100%', height: '150px', objectFit: 'cover' }}
-								onMouseEnter={() =>
-									setCurrentImage(product.hoverImage || product.image)
-								}
-								onMouseLeave={() => setCurrentImage(product.image)}
 							/>
 							<p style={{ margin: '10px 0' }}>{product.name}</p>
 							<p
@@ -253,7 +285,7 @@ const ProductList = () => {
 								{product.price.toLocaleString()} VND
 							</p>
 							<Button
-								className='bg-primary hover:!bg-secondary text-black'
+								className="bg-primary hover:!bg-secondary text-black"
 								type="primary"
 							>
 								Thêm vào giỏ hàng
