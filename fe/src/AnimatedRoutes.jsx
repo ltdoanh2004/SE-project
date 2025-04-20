@@ -4,6 +4,7 @@ import { Routes, Route } from 'react-router-dom'
 import Home from './routes/Home/Home'
 import Login from './routes/Login/Login'
 import Register from './routes/Login/Register'
+import AboutUs from './routes/Shop/AboutUs'
 import Shop from './routes/Shop/Shop'
 
 // Import 3d pages
@@ -35,6 +36,8 @@ export default function AnimatedRoutes() {
 			{/* <Route path="/jewelry/:product_type" element={<FilterSidebar/>} /> */}
 			{/* <Route path='/product/:id' element={<ProductPage/>}/> */}
 			<Route path="/confirm" element={<ConfirmOrderPage />} />
+			<Route path="/aboutus" element={<AboutUs />} />
+
 
 			<Route path="/product">
 				<Route index />
