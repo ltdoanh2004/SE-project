@@ -5,13 +5,13 @@ import Products from './Products'
 import InfoSection from './InfoSection'
 import BestSeller from './BestSeller'
 import Contact from './Contact'
-import ProductList from './ProductList'
+import ProductList from '../ListProduct/ProductList'
 export default function Home() {
 	return (
 		<Transition className="flex justify-center items-center flex-col">
 			<Banner />
 			{/* <Service /> */}
-			<ProductList />
+			<BestSeller />
 			<Products />
 			<InfoSection />
 

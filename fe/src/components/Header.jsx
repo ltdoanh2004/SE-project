@@ -2,6 +2,8 @@ import { useState } from 'react'
 import Logo from '../assets/logo.png'
 import NavLinks from '../components/Navbar/NavLinks'
 import { Link } from 'react-router-dom'
+import avatar from '../assets/image/banner2.png'
+import { Drawer } from 'vaul'
 
 import {
 	CiMenuBurger,
@@ -9,6 +11,7 @@ import {
 	CiShoppingCart,
 	CiUser,
 } from 'react-icons/ci'
+import { Search, ShoppingCart } from 'lucide-react'
 
 const UserItem = [
 	{ icon: <CiUser className="inline-block" />, path: '/account' },
@@ -17,8 +20,9 @@ const UserItem = [
 
 const Header = () => {
 	const [open, setOpen] = useState(false)
+	const [isLogin, SetIsLogin] = useState(true)
 	return (
-		<nav className="bg-primary text-white ">
+		<nav className="bg-primary text-black ">
 			<div className="container mx-auto flex justify-between items-center">
 				<div className="flex items-center justify-center">
 					<Link
@@ -28,9 +32,9 @@ const Header = () => {
 						<img
 							src={Logo}
 							alt="logo"
-							className="md:cursor-pointer h-9 w-9 md:h-10 md:w-10 filter invert"
+							className="md:cursor-pointer h-9 w-9 md:h-10 md:w-10 filter"
 						/>
-						<span className="uppercase text-xl">JEIFY JEWELRY</span>
+						<span className="uppercase text-xl text-black">JEIFY JEWELRY</span>
 					</Link>
 				</div>
 				<div className="z-50 p-5 md:w-auto flex justify-between">
@@ -45,26 +49,68 @@ const Header = () => {
 						)}
 					</button>
 				</div>
-				<ul className="flex items-center gap-8 font-sans uppercase">
+				<ul className="flex items-center gap-6 font-sans uppercase">
 					<NavLinks />
-					<li className="py-3">
-						<Link
-							to="/jewelry"
-							className="bg-white text-primary font-bold text-lg py-2 px-4 rounded"
-						>
-							Custom
-						</Link>
-					</li>
-					<li className="py-3">
-						<a
-							href="https://jeifypro.netlify.app/"
-							target="_blank"
-							rel="noopener noreferrer"
-							className="bg-white text-primary font-bold text-lg py-2 px-4 rounded"
-						>
-							Chat
-						</a>
-					</li>
+
+					{isLogin ? (
+						<div className="flex items-center justify-center gap-4">
+							<Drawer.Root direction="right">
+								<Drawer.Trigger>
+									<span className="text-sm normal-case">
+										Xin chào, Đào Hữu Hoài
+									</span>
+								</Drawer.Trigger>
+								<Drawer.Portal>
+									<Drawer.Overlay className="fixed inset-0 bg-black/40" />
+									<Drawer.Content className="bg-gray-100 h-full fixed w-128 right-0 bottom-0 outline-none">
+										<div className="p-12 flex flex-col">
+											<span className="text-center text-xl">
+												Xin chào, Đào Hữu Hoài
+											</span>
+											<div className="my-6 flex flex-col">
+												<Link to={'/'} className="hover:border-[1px] hover:shadow-sm px-4 py-2 hover:bg-primary hover:rounded-lg border-b-2">
+													Tài Khoản
+												</Link>
+												<Link to={'/'} className="hover:border-[1px] hover:shadow-sm px-4 py-2 hover:bg-primary hover:rounded-lg border-b-2">
+													Đơn Hàng
+												</Link>
+												<Link to={'/'} className="hover:border-[1px] hover:shadow-sm px-4 py-2 hover:bg-primary hover:rounded-lg border-b-2">
+													Yêu Thích
+												</Link>
+												<a
+													href="https://jeifypro.netlify.app/"
+													target="_blank"
+													rel="noopener noreferrer"
+													className="hover:border-[1px] hover:shadow-sm px-4 py-2 hover:bg-primary hover:rounded-lg border-b-2"
+												>
+													Chat
+												</a>
+											</div>
+										</div>
+									</Drawer.Content>
+								</Drawer.Portal>
+							</Drawer.Root>
+							<Search />
+							<ShoppingCart />
+						</div>
+					) : (
+						<li className="py-3 flex gap-2">
+							<Link
+								to="/jewelry"
+								className="bg-white text-primary font-bold text-lg py-2 px-4 rounded"
+							>
+								Log in
+							</Link>
+							<a
+								href="https://jeifypro.netlify.app/"
+								target="_blank"
+								rel="noopener noreferrer"
+								className="bg-white text-primary font-bold text-lg py-2 px-4 rounded"
+							>
+								Chat
+							</a>
+						</li>
+					)}
 				</ul>
 
 				{/* <ul className="md:flex hidden items-center justify-center space-x-4">
