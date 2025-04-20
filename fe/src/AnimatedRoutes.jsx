@@ -14,6 +14,8 @@ import NotFound from './routes/NotFound'
 
 import ProductPage from './routes/Product/ProductPage'
 import ProductList from './routes/ListProduct/ProductList'
+import OrderDashboard from './routes/admin/OrderDasboard'
+import EmployeeDashboard from './routes/admin/EmployeeDasboard'
 
 // Import transitions
 
@@ -32,6 +34,10 @@ export default function AnimatedRoutes() {
 			<Route path="/product">
 				<Route index />
 				<Route path=":productId" element={<ProductPage />} />
+			</Route>
+			<Route path="/admin" >
+				<Route path="order" element={<OrderDashboard />} />
+				<Route path="employee" element={<EmployeeDashboard />} />
 			</Route>
 
 			{/* <Route path="/about" element={<About />} /> */}
