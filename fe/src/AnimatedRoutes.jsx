@@ -13,6 +13,7 @@ import Jewelry from './routes/Jewelry'
 import NotFound from './routes/NotFound'
 
 import ProductPage from './routes/Product/ProductPage'
+import ConfirmOrderPage from './routes/Order/OrderConfirm'
 import ProductList from './routes/ListProduct/ProductList'
 import OrderDashboard from './routes/admin/OrderDasboard'
 import EmployeeDashboard from './routes/admin/EmployeeDasboard'
@@ -31,6 +32,10 @@ export default function AnimatedRoutes() {
 			<Route path="/account" element={<Login />} />
 			<Route path="/register" element={<Register />} />
 			<Route path="/cart" element={<Shop />} />
+			<Route path="/jewelry/:product_type" element={<FilterSidebar/>} />
+			<Route path='/product/:id' element={<ProductPage/>}/>
+			<Route path='/confirm' element={<ConfirmOrderPage/>}/>
+
 			<Route path="/product">
 				<Route index />
 				<Route path=":productId" element={<ProductPage />} />
