@@ -4,6 +4,12 @@ import Order from "./Order.js";
 import Product from "./Product.js";
 
 const OrDuct = sequelize.define("OrDuct", {
+  orDuctID: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    allowNull: false,
+    primaryKey: true,
+  },
   orderID: {
     type: DataTypes.INTEGER,
     allowNull: false,
@@ -28,6 +34,22 @@ const OrDuct = sequelize.define("OrDuct", {
     type: DataTypes.BOOLEAN,
     allowNull: false,
   },
+  price: {
+    type: DataTypes.DECIMAL(12, 0),
+    allowNull: false,
+    defaultValue: 0, 
+    validate: {
+      min: 0,
+    },
+  },
+  discount: {
+    type: DataTypes.DECIMAL(5, 2),
+    allowNull: false,
+    defaultValue: 0,
+    validate: {
+      min: 0,
+    },
+  }
 }, { timestamps: false });
 
 Order.hasMany(OrDuct, { foreignKey: "orderID" });

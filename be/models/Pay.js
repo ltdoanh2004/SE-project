@@ -1,10 +1,14 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../DB/index.js";
 import Order from "./Order.js";
-import Admin from "./Admin.js";
 
 const Pay = sequelize.define("Pay", {
-  OrderID: {
+  payID: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
+  },
+  orderID: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
@@ -12,33 +16,39 @@ const Pay = sequelize.define("Pay", {
       key: "orderID",
     },
   },
-  userID: {
-    type: DataTypes.INTEGER,
+  payDate: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
+  payType: {
+    type: DataTypes.STRING(20),
     allowNull: false,
-    references: {
-      model: Admin,
-      key: "userID",
+    validate: {
+      isIn: [["cash", "bank-transfer"]],
     },
   },
-  transactionDate: {
-    type: DataTypes.DATE,
-    defaultValue: DataTypes.NOW,
-    allowNull: false,
-  },
   money: {
-    type: DataTypes.DECIMAL(10, 2),
+    type: DataTypes.DECIMAL(12, 0),
     allowNull: false,
   },
   isPaid: {
     type: DataTypes.BOOLEAN,
     allowNull: false,
   },
+  // transactionType: {
+  //   type: DataTypes.STRING(20),
+  //   allowNull: true,
+  //   validate: {
+  //     isIn: [["Momo"]],
+  //   },
+  // },
+  // transactionID: {
+  //   type: DataTypes.STRING(100),
+  //   allowNull: true,
+  // },
 }, { timestamps: false });
 
 Order.hasOne(Pay, { foreignKey: "orderID" });
 Pay.belongsTo(Order, { foreignKey: "orderID" });
 
-Admin.hasMany(Pay, { foreignKey: "userID" });
-Pay.belongsTo(Admin, { foreignKey: "userID" });
-
-export default Payment;
+export default Pay;

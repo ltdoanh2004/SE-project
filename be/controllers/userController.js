@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import User from "../models/User.js";
 import Customer from "../models/Customer.js";
 import nodemailer from "nodemailer";
+import Token from "../models/Token.js";
 
 dotenv.config();
 
@@ -93,9 +94,12 @@ export const forgetPassword = async (req, res) => {
     
         // Tạo token xác nhận (có thời hạn 15 phút)
         const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "15m" });
+
+        // Lưu token vào database
+        const { tokenID } = await Token.create({ token });
     
         // Gửi email với link xác nhận
-        const resetLink = `http://${process.env.HOST}:${process.env.PORT}/data/user/resetPassword?token=${token}`;
+        const resetLink = `http://${process.env.HOST}:${process.env.PORT}/api/users/reset-password?tokenID=${tokenID}&token=${token}`;
         const mailOptions = {
             from: process.env.EMAIL_USERNAME,
             to: email,
@@ -120,7 +124,7 @@ export const forgetPassword = async (req, res) => {
           
     
         await transporter.sendMail(mailOptions);
-        res.json({ message: "The confirmation email has been sent, please check your inbox!" });
+        res.status(200).json({ message: "The confirmation email has been sent, please check your inbox!" });
     
     } catch (error) {
         console.error("Error sending email:", error);
@@ -131,65 +135,85 @@ export const forgetPassword = async (req, res) => {
 // Reset mật khẩu
 export const resetPassword = async (req, res) => {
     try {
-        const { token } = req.query;
+        const { tokenID, token } = req.query;
+
+        console.log("Received tokenID:", tokenID);
+        console.log("Received token:", token);
         if (!token || token === "null") {
-            return res.send(`
-                <html>
-                    <body>
-                        <h2 style="color: red;">Invalid or expired token!</h2>
-                        <script> setTimeout(() => window.close(), 3000); </script>
-                    </body>
-                </html>
-            `);
+            await Token.destroy({ where: { tokenID } });
+            return showError(res, "Invalid or expired token!");
         }
-    
-        // Giải mã token
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        // 1. Tìm token trong DB
+        const tokenRecord = await Token.findOne({ where: { tokenID } });
+
+        if (!tokenRecord || tokenRecord.token !== token) {
+            await Token.destroy({ where: { tokenID } });
+            return showError(res, "Invalid or expired token!");
+        }
+
+        // 2. Xác thực JWT
+        let decoded;
+        try {
+            decoded = jwt.verify(token, process.env.JWT_SECRET);
+        } catch (err) {
+            // Token không hợp lệ hoặc đã hết hạn → xóa
+            await Token.destroy({ where: { tokenID } });
+            return showError(res, "Invalid or expired token!");
+        }
+
         const email = decoded.email;
-    
-        // Tạo mật khẩu mới ngẫu nhiên
+
+        // 3. Xóa token sau khi sử dụng
+        await Token.destroy({ where: { tokenID } });
+
+        // 4. Tạo mật khẩu mới ngẫu nhiên
         const newPassword = crypto.randomBytes(6).toString("hex");
-    
-        // Cập nhật mật khẩu trong DB 
-        await User.update({ password: newPassword}, { where: { email } });
-    
-        // Gửi mật khẩu mới qua email
+
+        // 5. Mã hóa mật khẩu nếu bạn dùng bcrypt
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        // 6. Cập nhật mật khẩu mới trong DB
+        await User.update({ password: hashedPassword }, { where: { email } });
+
+        // 7. Gửi mật khẩu mới qua email
         const mailOptions = {
             from: process.env.EMAIL_USERNAME,
             to: email,
-            subject: "Your new password",
+            subject: "Your New Password",
             text: `Your new password is: ${newPassword}`,
         };
 
-        console.log("newPassword:",
-        newPassword);
-    
         await transporter.sendMail(mailOptions);
 
-        // Hiển thị thông báo trên trình duyệt và tự động đóng
-        res.send(`
+        // 8. Trả phản hồi thành công
+        return res.send(`
             <html>
                 <body>
                     <h2 style="color: green;">Your password has been reset successfully!</h2>
                     <p>Please check your email for the new password.</p>
-                    <script> setTimeout(() => window.close(), 5000); </script>
+                    <script> setTimeout(() => window.close(), 6000); </script>
                 </body>
             </html>
         `);
 
     } catch (error) {
         console.error("Error resetting password:", error);
-        res.send(`
-            <html>
-                <body>
-                    <h2 style="color: red;">Error resetting password!</h2>
-                    <p>Please try again later.</p>
-                    <script> setTimeout(() => window.close(), 5000); </script>
-                </body>
-            </html>
-        `);
+        return showError(res, "Error resetting password! Please try again later.");
     }
 };
+
+// Hàm hiển thị lỗi HTML
+function showError(res, message) {
+    return res.send(`
+        <html>
+            <body>
+                <h2 style="color: red;">${message}</h2>
+                <script> setTimeout(() => window.close(), 6000); </script>
+            </body>
+        </html>
+    `);
+}
 
 
 //tạo tài khoản customer
@@ -278,7 +302,9 @@ export const getRole = async (req, res) => {
         }
 
         // Trả về role nếu hợp lệ
-        res.json({ role: user.role });
+        res.status(200).json({ 
+            role: user.role 
+        });
 
     } catch (error) {
         console.error("Get Role Error:", error);
@@ -325,10 +351,65 @@ export const renewToken = async (req, res) => {
         );
 
         // Trả về token mới
-        res.json({ accessToken: newToken });
+        res.status(200).json({ accessToken: newToken });
 
     } catch (error) {
         console.error("Renew Token Error:", error);
         res.status(403).json({ message: "Invalid or expired token" });
+    }
+};
+
+export const changePassword = async (req, res) => {
+    try {
+        const authHeader = req.headers["authorization"];
+        console.log("Received Authorization Header:", authHeader);
+
+        if (!authHeader) {
+            return res.status(401).json({ message: "Token required" });
+        }
+
+        const token = authHeader.split(" ")[1];
+        console.log("Extracted Token:", token);
+
+        if (!token || token === "null") {
+            return res.status(403).json({ message: "Invalid token format" });
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        console.log("Decoded Token:", decoded);
+
+        const { userID, email } = decoded;
+
+        const { oldPassword, newPassword } = req.body;
+
+        if (!oldPassword || !newPassword) {
+            return res.status(400).json({ message: "Missing old or new password" });
+        }
+
+        if (oldPassword === newPassword) {
+            return res.status(400).json({ message: "New password must be different from old password" });
+        }
+
+        const user = await User.findOne({ where: { userID, email } });
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const isMatch = await bcrypt.compare(oldPassword, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ message: "Old password is incorrect" });
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+        user.password = hashedPassword;
+        await user.save();
+
+        res.status(200).json({ message: "Password changed successfully" });
+    } catch (error) {
+        console.error("Change Password Error:", error);
+        res.status(500).json({ message: "Internal server error" });
     }
 };

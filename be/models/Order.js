@@ -23,11 +23,14 @@ const Order = sequelize.define("Order", {
     allowNull: false,
   },
   status: {
-    type: DataTypes.STRING(50),
+    type: DataTypes.STRING(20),
     allowNull: false,
+    validate: {
+      isIn: [["processing", "shipped","done" ,"cancel"]],
+    },
   },
   money: {
-    type: DataTypes.DECIMAL(10, 2),
+    type: DataTypes.DECIMAL(12, 0),
     allowNull: false,
   },
   cancel: {
@@ -38,14 +41,9 @@ const Order = sequelize.define("Order", {
     type: DataTypes.STRING(100),
     allowNull: true,
   },
-  coupon: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
 }, { timestamps: false });
 
 Customer.hasMany(Order, { foreignKey: "userID" });
 Order.belongsTo(Customer, { foreignKey: "userID" });
-
 
 export default Order;
