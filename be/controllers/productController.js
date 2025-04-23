@@ -308,7 +308,7 @@ export const deleteProductById = async (req, res) => {
             }
 
             await Product.destroy({ where: { productID: id } });
-            return res.json({ message: "Product and associated files deleted successfully" });
+            return res.status(201).json({ message: "Product and associated files deleted successfully" });
         }
 
         // Kiểm tra trạng thái shipped

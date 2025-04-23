@@ -87,7 +87,6 @@ export const createMomoPayment = async (req, res) => {
         // Tạo yêu cầu thanh toán qua MoMo
         const orderInfo = 'pay with MoMo';
         const partnerCode = 'MOMO';
-        const redirectUrl = redirectUrl; // Địa chỉ URL để chuyển hướng sau khi thanh toán thành công
         const ipnUrl = `${bePublicUrl}/api/payments/momo/transaction/callback`;  // Địa chỉ URL để nhận thông báo từ MoMo về trạng thái thanh toán
         const requestType = "payWithMethod";
         const amount = order.money; // Sử dụng số tiền trong đơn hàng

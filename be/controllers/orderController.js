@@ -4,6 +4,8 @@ import Order from "../models/Order.js";
 import Product from "../models/Product.js";
 import OrDuct from "../models/OrDuct.js";
 import Pay from "../models/Pay.js";
+import  Op  from "sequelize";
+
 
 export const createOrder = async (req, res) => {
     try {

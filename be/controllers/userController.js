@@ -401,10 +401,7 @@ export const changePassword = async (req, res) => {
             return res.status(401).json({ message: "Old password is incorrect" });
         }
 
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(newPassword, salt);
-
-        user.password = hashedPassword;
+        user.password = newPassword; // Mật khẩu mới đã được mã hóa trong model
         await user.save();
 
         res.status(200).json({ message: "Password changed successfully" });
