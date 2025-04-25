@@ -18,6 +18,7 @@ import ConfirmOrderPage from './routes/Order/OrderConfirm'
 import ProductList from './routes/ListProduct/ProductList'
 import OrderDashboard from './routes/admin/OrderDasboard'
 import EmployeeDashboard from './routes/admin/EmployeeDasboard'
+import Cart from './routes/cart/Cart'
 
 // Import transitions
 
@@ -32,12 +33,11 @@ export default function AnimatedRoutes() {
 			</Route>
 			<Route path="/account" element={<Login />} />
 			<Route path="/register" element={<Register />} />
-			<Route path="/cart" element={<ProductPage />} />
+			<Route path="/cart" element={<Cart />} />
 			{/* <Route path="/jewelry/:product_type" element={<FilterSidebar/>} /> */}
 			{/* <Route path='/product/:id' element={<ProductPage/>}/> */}
 			<Route path="/confirm" element={<ConfirmOrderPage />} />
 			<Route path="/aboutus" element={<AboutUs />} />
-
 
 			<Route path="/product">
 				<Route index />
