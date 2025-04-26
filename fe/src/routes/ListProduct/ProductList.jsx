@@ -2,8 +2,10 @@ import React, { useEffect, useState } from 'react'
 import { Checkbox, Collapse, Slider, Button, Card } from 'antd'
 import './ProductList.css'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { addToCart } from '../../redux/actions/cartActions' // Đường dẫn đã được cập nhật
 import { filter } from 'framer-motion/client'
 import { use } from 'react'
+import { useDispatch } from 'react-redux'
 
 const { Panel } = Collapse
 
@@ -83,6 +85,8 @@ const products = [
 ]
 
 const ProductList = () => {
+	const dispatch = useDispatch()
+	const navigate = useNavigate()
 	const defaultFilters = {
 		type: [],
 		brand: [],
@@ -117,7 +121,8 @@ const ProductList = () => {
 	console.log(filters)
 
 	useEffect(() => {
-		setCurrentImage(products.map((product) => product.image))}, [])
+		setCurrentImage(products.map((product) => product.image))
+	}, [])
 
 	const handleSliderChange = (value) => {
 		setFilters((prev) => ({ ...prev, price: value }))
@@ -141,12 +146,16 @@ const ProductList = () => {
 		)
 	}
 
+	const handleAddToCart = (product) => {
+		dispatch(addToCart(product))
+		navigate('/cart')
+	}
+
 	const resetFilters = () => {
 		setFilters(defaultFilters)
 		setFilteredProducts(products)
 	}
 
-	const navigate = useNavigate()
 	const handleClickCard = (product) => {
 		// Navigate to product detail page or perform any action you want
 		navigate(`/product/${product.id}`)
@@ -287,6 +296,10 @@ const ProductList = () => {
 							<Button
 								className="bg-primary hover:!bg-secondary text-black"
 								type="primary"
+								onClick={(e) => {
+									e.stopPropagation()
+									handleAddToCart(product)
+								}}
 							>
 								Thêm vào giỏ hàng
 							</Button>
