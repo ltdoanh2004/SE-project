@@ -31,7 +31,7 @@ export default function AnimatedRoutes() {
 				<Route index element={<Jewelry />} />
 				<Route path=":sex/:filter/:query" element={<ProductList />} />
 			</Route>
-			<Route path="/account" element={<Login />} />
+			<Route path="/login" element={<Login />} />
 			<Route path="/register" element={<Register />} />
 			<Route path="/cart" element={<Cart />} />
 			{/* <Route path="/jewelry/:product_type" element={<FilterSidebar/>} /> */}

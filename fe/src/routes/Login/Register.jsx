@@ -1,10 +1,14 @@
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useDispatch } from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom'
 import { registerUser } from '../../redux/actions/actionUser' // Adjust the import path as needed
 import Transition from '../../utils/Transition'
 import Logo from '../../assets/logo.png' // Adjust the import path as needed
+import {UserAuthenticationService} from '../../services/user/auth/userAuthentication'
+import {CookieService} from '../../utils/CookieService'
+import {TokenService} from '../../utils/tokenService'
+import { UserPublicInfoProvider } from '../../components/provider/provider'
 
 export default function RegisterPage() {
 	const {
@@ -15,13 +19,24 @@ export default function RegisterPage() {
 	const dispatch = useDispatch()
 	const navigate = useNavigate()
 	const [registrationError, setRegistrationError] = useState('')
+	const [isLoading, setIsLoading] = useState(false)
 
 	const onSubmit = async (data) => {
 		// This assumes 'data' comes directly from react-hook-form and contains only email and password
 		try {
-			console.log(data)
-			// await dispatch(registerUser(data)) // 'data' should already be { email: '', password: '' }
-			navigate('/')
+			await UserAuthenticationService.signUp(data)
+				.then((res) => {
+					console.log(res)
+					const tokenPayload = TokenService.decodeToken(res.token)
+					const tokenExp = new Date(tokenPayload.exp * 1000)
+					CookieService.setCookie('token', res.token, tokenExp)
+					localStorage.setItem('userName', res.user.userName)
+					navigate('/')
+				})
+				.catch((error) => {
+					console.log(error)
+				})
+			setIsLoading(true)
 		} catch (error) {
 			setRegistrationError(error.message)
 		}
@@ -46,8 +61,8 @@ export default function RegisterPage() {
 					</h2>
 					<input
 						placeholder="Your Full Name"
-						{...register('fullName', {
-							required: 'Full name is required'
+						{...register('userName', {
+							required: 'Full name is required',
 						})}
 						className="w-full px-4 py-2 border rounded leading-tight focus:outline-none focus:border-primary"
 					/>
@@ -79,7 +94,7 @@ export default function RegisterPage() {
 					)}
 					<input
 						type="submit"
-						className="w-full px-4 py-2 font-bold text-white bg-primary rounded hover:bg-primary-dark focus:outline-none focus:shadow-outline"
+						className="w-full px-4 py-2 font-bold text-white bg-primary hover:cursor-pointer hover:bg-secondary rounded hover:bg-primary-dark focus:outline-none focus:shadow-outline"
 						value="Register"
 					/>
 				</form>

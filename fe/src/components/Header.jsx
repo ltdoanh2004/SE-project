@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 import Logo from '../assets/logo.png'
 import NavLinks from '../components/Navbar/NavLinks'
 import { Link } from 'react-router-dom'
@@ -12,6 +12,7 @@ import {
 	CiUser,
 } from 'react-icons/ci'
 import { Search, ShoppingCart } from 'lucide-react'
+import { AuthProvider, UserPublicInfoProvider } from './provider/provider'
 
 const UserItem = [
 	{ icon: <CiUser className="inline-block" />, path: '/account' },
@@ -20,7 +21,8 @@ const UserItem = [
 
 const Header = () => {
 	const [open, setOpen] = useState(false)
-	const [isLogin, SetIsLogin] = useState(true)
+	const { isAuth, SetIsAuth } = useContext(AuthProvider)
+	const userName = localStorage.getItem('userName')
 	return (
 		<nav className="bg-primary text-black ">
 			<div className="container mx-auto flex justify-between items-center">
@@ -52,12 +54,12 @@ const Header = () => {
 				<ul className="flex items-center gap-6 font-sans uppercase">
 					<NavLinks />
 
-					{isLogin ? (
+					{isAuth ? (
 						<div className="flex items-center justify-center gap-4">
 							<Drawer.Root direction="right">
 								<Drawer.Trigger>
 									<span className="text-sm normal-case">
-										Xin chào, Đào Hữu Hoài
+										Xin chào, {userName}
 									</span>
 								</Drawer.Trigger>
 								<Drawer.Portal>
@@ -65,7 +67,7 @@ const Header = () => {
 									<Drawer.Content className="bg-gray-100 h-full fixed w-128 right-0 bottom-0 outline-none">
 										<div className="p-12 flex flex-col">
 											<span className="text-center text-xl">
-												Xin chào, Đào Hữu Hoài
+												Xin chào, {userName}
 											</span>
 											<div className="my-6 flex flex-col">
 												<Link
@@ -99,7 +101,7 @@ const Header = () => {
 									</Drawer.Content>
 								</Drawer.Portal>
 							</Drawer.Root>
-							<Search className='hover:cursor-pointer'/>
+							<Search className="hover:cursor-pointer" />
 							<Link to={'/cart'} className="hover:cursor-pointer">
 								<ShoppingCart />
 							</Link>
@@ -107,7 +109,7 @@ const Header = () => {
 					) : (
 						<li className="py-3 flex gap-2">
 							<Link
-								to="/jewelry"
+								to="/login"
 								className="bg-white text-primary font-bold text-lg py-2 px-4 rounded"
 							>
 								Log in
