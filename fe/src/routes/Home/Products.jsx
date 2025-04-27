@@ -76,7 +76,7 @@ export default function Products() {
 	}
 
 	return (
-		<div className="container mx-auto">
+		<div className="mx-auto w-[90vw]">
 			<div className="text-center my-12">
 				<h1 className="text-2xl font-normal text-yellow-600">
 					Top Accessories

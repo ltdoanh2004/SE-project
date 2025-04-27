@@ -15,19 +15,8 @@
     background: #fff;
 }
 
-.product-list {
-    width: 70%;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-}
-
 .ant-collapse-content {
     border-top: none !important;
-}
-
-.ant-card {
-    width: 250px;
 }
 
 /* .ant-checkbox-wrapper {

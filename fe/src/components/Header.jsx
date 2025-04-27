@@ -13,6 +13,7 @@ import {
 } from 'react-icons/ci'
 import { Search, ShoppingCart } from 'lucide-react'
 import { AuthProvider, UserPublicInfoProvider } from './provider/provider'
+import {CookieService} from '../utils/CookieService'
 
 const UserItem = [
 	{ icon: <CiUser className="inline-block" />, path: '/account' },
@@ -23,9 +24,14 @@ const Header = () => {
 	const [open, setOpen] = useState(false)
 	const { isAuth, SetIsAuth } = useContext(AuthProvider)
 	const userName = localStorage.getItem('userName')
+	const handleLogOut = () => {
+		CookieService.removeCookie('token')
+		localStorage.removeItem('userName')
+		window.location.reload()
+	}
 	return (
-		<nav className="bg-primary text-black ">
-			<div className="container mx-auto flex justify-between items-center">
+		<nav className="bg-primary text-black w-full h-20 px-4">
+			<div className="flex justify-between items-center 2xl:justify-center 2xl:gap-40">
 				<div className="flex items-center justify-center">
 					<Link
 						to="/"
@@ -96,12 +102,15 @@ const Header = () => {
 												>
 													Chat
 												</a>
-												<Link
-													to={'/'}
-													className="hover:border-[1px] hover:shadow-sm px-4 py-2 hover:bg-primary hover:rounded-lg border-b-2"
+												<button
+												onClick={(e) => {
+													e.preventDefault()
+														handleLogOut()
+													}}
+													className="hover:border-[1px] text-left hover:shadow-sm px-4 py-2 hover:bg-primary hover:rounded-lg border-b-2"
 												>
 													Đăng Xuất
-												</Link>
+												</button>
 											</div>
 										</div>
 									</Drawer.Content>

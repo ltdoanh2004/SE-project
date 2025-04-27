@@ -162,8 +162,8 @@ const ProductList = () => {
 	}
 
 	return (
-		<div className="flex flex-row justify-around px-40 my-20">
-			<div className="filter-sidebar">
+		<div className="flex flex-row justify-around px-40 max-lg:px-5 lg:px-10 lg:gap-4 gap-0 my-20 xl:justify-center">
+			<div className="filter-sidebar max-md:w-[300px] max-xl:w-[300px] max-sm:w-[150px]">
 				<Collapse activeKey={activePanels} onChange={setActivePanels}>
 					<Panel header="Loại" key="1">
 						{['Nhẫn', 'Dây chuyền', 'Bông tai', 'Lắc Vòng'].map((item) => (
@@ -257,14 +257,14 @@ const ProductList = () => {
 					</Button>
 				</div>
 			</div>
-			<div className="product-list">
+			<div className=" grid grid-cols-3 gap-4 max-md:grid-cols-2 max-lg:grid-cols-2">
 				{filteredProducts.map((product, index) => {
 					return (
 						<Card
 							onClick={() => handleClickCard(product)}
 							key={product.id}
-							style={{ width: 350, height: 350, textAlign: 'center' }}
-							className="hover:cursor-pointer"
+							style={{ textAlign: 'center' }}
+							className="hover:cursor-pointer 2xl:w-[300px] xl:w-[300px] max-lg:w-[250px] lg:w-[240px] max-md:w-[250px] max-sm:w-[150px]"
 							onMouseEnter={() =>
 								setCurrentImage((prev) => ({
 									...prev,

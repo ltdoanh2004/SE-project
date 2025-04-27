@@ -21,20 +21,20 @@ const settings = {
 
 const InfoSection = () => {
   return (
-    <div className="container mx-auto mt-20 mb-20">
-      <Slider {...settings}>
-        <div className="flex justify-center">
-          <img className="w-1/2 mx-auto" src={img1} alt="Image 1" />
-        </div>
-        <div className="flex justify-center">
-          <img className="w-1/2 mx-auto" src={img2} alt="Image 2" />
-        </div>
-        <div className="flex justify-center">
-          <img className="w-1/2 mx-auto" src={img3} alt="Image 3" />
-        </div>
-      </Slider>
-    </div>
-  );
+		<div className="w-[90vw] mt-20 mb-20">
+			<Slider {...settings}>
+				<div className="flex justify-center">
+					<img className="w-1/2 mx-auto" src={img1} alt="Image 1" />
+				</div>
+				<div className="flex justify-center">
+					<img className="w-1/2 mx-auto" src={img2} alt="Image 2" />
+				</div>
+				<div className="flex justify-center">
+					<img className="w-1/2 mx-auto" src={img3} alt="Image 3" />
+				</div>
+			</Slider>
+		</div>
+	)
 };
 
 export default InfoSection;

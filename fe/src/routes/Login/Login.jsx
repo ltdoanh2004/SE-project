@@ -21,15 +21,15 @@ export default function LoginPage() {
 
 	const onSubmit = async (data) => {
 		try {
-			UserAuthenticationService.login(data).then((res) => {
+			UserAuthenticationService.login(data).then(async (res) => {
 				console.log(res)
-				const tokenPayload = TokenService.decodeToken(res.token)
-				const tokenExp = new Date(tokenPayload.exp * 1000)
+				const tokenPayload = await TokenService.decodeToken(res.token)
+				const tokenExp = await new Date(tokenPayload.exp * 1000)
 				CookieService.setCookie('token', res.token, tokenExp)
 				localStorage.setItem('userName', res.user.userName)
+				navigate('/', )
+				window.location.reload()
 			})
-			navigate('/', )
-            window.location.reload()
 		} catch (error) {
 			console.error(error)
 		}
