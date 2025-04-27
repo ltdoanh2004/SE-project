@@ -51,6 +51,69 @@ const ChatbotOpenAI = ({ embedded = false }) => {
     }).format(price);
   };
 
+  // Hàm xử lý và chuyển đổi URL thành liên kết trong tin nhắn
+  const renderMessageContent = (content) => {
+    if (!content) return '';
+    
+    // Regex để tìm URL trong văn bản, bao gồm cả URL trong ngoặc vuông
+    const urlRegex = /(\[.*?\])?\((https?:\/\/[^\s\)]+)\)|(?<!\()(https?:\/\/[^\s]+)(?!\))/g;
+    
+    // Replace URL với anchor tag
+    const parts = [];
+    let lastIndex = 0;
+    let match;
+    
+    content = content.toString();
+    
+    while ((match = urlRegex.exec(content)) !== null) {
+      // Văn bản trước URL
+      if (match.index > lastIndex) {
+        parts.push(content.substring(lastIndex, match.index));
+      }
+      
+      // Xử lý URL trong định dạng Markdown [text](url)
+      if (match[1] && match[2]) {
+        const linkText = match[1].substring(1, match[1].length - 1); // Remove []
+        const url = match[2];
+        parts.push(
+          <a 
+            key={match.index}
+            href={url} 
+            className="text-blue-600 hover:underline"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {linkText || url}
+          </a>
+        );
+      } 
+      // Xử lý URL thông thường
+      else {
+        const url = match[3] || match[0];
+        parts.push(
+          <a 
+            key={match.index}
+            href={url} 
+            className="text-blue-600 hover:underline"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {url}
+          </a>
+        );
+      }
+      
+      lastIndex = match.index + match[0].length;
+    }
+    
+    // Văn bản còn lại sau URL cuối cùng
+    if (lastIndex < content.length) {
+      parts.push(content.substring(lastIndex));
+    }
+    
+    return parts.length ? parts : content;
+  };
+
   // Process user message with OpenAI
   const processMessage = async (userMessage) => {
     // Add user message to chat
@@ -134,11 +197,11 @@ const ChatbotOpenAI = ({ embedded = false }) => {
               <div 
                 className={`inline-block p-3 rounded-lg ${
                   message.role === 'user' 
-                    ? 'bg-primary text-black rounded-tr-none' 
+                    ? 'bg-yellow-500 text-black rounded-tr-none' 
                     : 'bg-white border border-gray-200 text-gray-800 rounded-tl-none shadow-sm'
                 }`}
               >
-                {message.content}
+                {renderMessageContent(message.content)}
               </div>
               
               {/* Product suggestions */}
@@ -197,11 +260,11 @@ const ChatbotOpenAI = ({ embedded = false }) => {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type your message..."
-              className="flex-1 border border-gray-300 rounded-l-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary"
+              className="flex-1 border border-gray-300 rounded-l-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-yellow-500"
             />
             <button 
               type="submit"
-              className="bg-primary text-black px-3 py-2 rounded-r-lg hover:bg-secondary hover:text-white focus:outline-none"
+              className="bg-yellow-500 text-black px-3 py-2 rounded-r-lg hover:bg-secondary hover:text-white focus:outline-none"
             >
               <BiSend size={20} />
             </button>
@@ -242,11 +305,11 @@ const ChatbotOpenAI = ({ embedded = false }) => {
                 <div 
                   className={`inline-block p-3 rounded-lg ${
                     message.role === 'user' 
-                      ? 'bg-primary text-black rounded-tr-none' 
+                      ? 'bg-yellow-500 text-black rounded-tr-none' 
                       : 'bg-white border border-gray-200 text-gray-800 rounded-tl-none shadow-sm'
                   }`}
                 >
-                  {message.content}
+                  {renderMessageContent(message.content)}
                 </div>
                 
                 {/* Product suggestions */}
@@ -305,11 +368,11 @@ const ChatbotOpenAI = ({ embedded = false }) => {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Type your message..."
-                className="flex-1 border border-gray-300 rounded-l-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary"
+                className="flex-1 border border-gray-300 rounded-l-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-yellow-500"
               />
               <button 
                 type="submit"
-                className="bg-primary text-black px-3 py-2 rounded-r-lg hover:bg-secondary hover:text-white focus:outline-none"
+                className="bg-yellow-500 text-black px-3 py-2 rounded-r-lg hover:bg-secondary hover:text-white focus:outline-none"
               >
                 <BiSend size={20} />
               </button>

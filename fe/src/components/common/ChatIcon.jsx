@@ -85,10 +85,10 @@ const ChatIcon = () => {
 							<button
 								onClick={() => switchChatType('openai')}
 								className={`p-1.5 rounded-full transition-colors flex items-center ${
-									chatType === 'openai' ? 'bg-purple-600 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+									chatType === 'openai' ? 'bg-yellow-500 text-black' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
 								}`}
-								aria-label="OpenAI Powered Consultant"
-								title="OpenAI Powered Consultant"
+								aria-label="Jeify Jewelry Consultant"
+								title="Jeify Jewelry Consultant"
 							>
 								<Sparkles size={16} />
 							</button>
@@ -108,9 +108,9 @@ const ChatIcon = () => {
 								</div>
 							) : (
 								<div className="pt-12 h-full">
-									<div className="bg-purple-700 text-white p-4 flex items-center">
+									<div className="bg-yellow-500 text-black p-4 flex items-center">
 										<Sparkles size={20} className="mr-2" />
-										<h3 className="font-semibold">OpenAI Jewelry Consultant</h3>
+										<h3 className="font-semibold">Jeify Jewelry Consultant</h3>
 									</div>
 									<ChatbotOpenAI embedded={true} />
 								</div>
