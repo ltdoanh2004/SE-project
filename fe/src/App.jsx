@@ -5,6 +5,8 @@ import { useEffect, useLayoutEffect, useState } from 'react'
 import { AuthProvider } from './components/provider/provider'
 import { CookieService } from './utils/CookieService'
 import { useNavigate } from 'react-router-dom'
+import ChatPage from './components/common/ChatPage'
+import ChatIcon from './components/common/ChatIcon'
 // import Navbar from './components/Navbar/Navbar'
 
 export default function App() {
@@ -17,14 +19,15 @@ export default function App() {
 			setIsAuth(false)
 		}
 	}, [isAuth])
-	
+
 	return (
 		<div className="flex flex-col min-h-screen">
 			<AuthProvider.Provider value={{ isAuth, setIsAuth }}>
-					<Header />
-					{/* <Navbar /> */}
-					<AnimatedRoutes />
-					<Footer />
+				<Header />
+				{/* <Navbar /> */}
+				<AnimatedRoutes />
+				<Footer />
+				<ChatIcon />
 			</AuthProvider.Provider>
 		</div>
 	)

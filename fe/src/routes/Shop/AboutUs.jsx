@@ -7,6 +7,9 @@ import {
 	FaDesktop,
 	FaChartLine,
 } from 'react-icons/fa'
+import logo from '../../assets/logo.png'
+import img from '../../assets/image/img2.png'
+import { Link } from 'react-router-dom'
 
 const AboutUs = () => {
 	return (
@@ -14,7 +17,7 @@ const AboutUs = () => {
 			{/* Section: Tiêu đề chính */}
 			<section className="w-full text-center bg-accent h-[250px] flex flex-col justify-center items-center space-y-4">
 				<h1 className="font-bold text-3xl">About Us</h1>
-				<p>A store for people who want to buy less, but better.</p>
+				<p>Mỗi sản phẩm đều là một kiệt tác.</p>
 			</section>
 
 			{/* Section: Nội dung chia đôi */}
@@ -26,21 +29,26 @@ const AboutUs = () => {
 					</h2>
 					<hr className="border-black mb-4 w-1/2 border-[1px]" />
 					<p className="text-gray-700">
-						A store for people who want to buy less, but better.
+						Mỗi sản phẩm đều là một kiệt tác.
 					</p>
 					<p className="mt-8 text-sm text-gray-700">
-						Mô tả ngắn gọn về sản phẩm Mô tả ngắn gọn về sản phẩm Mô tả ngắn gọn
-						về sản phẩm Mô tả ngắn gọn về sản phẩm Mô tả ngắn gọn về sản phẩm Mô
-						tả ngắn gọn về sản phẩm Mô tả ngắn gọn về sản phẩm Mô tả ngắn gọn về
-						...
+						Chúng tôi tự hào mang đến cho bạn những sản phẩm chất lượng cao,
+						được chế tác từ những nguyên liệu tốt nhất. Với sự kết hợp hoàn hảo
+						giữa thiết kế tinh tế và công nghệ tiên tiến, chúng tôi cam kết
+						mang đến cho bạn những sản phẩm không chỉ đẹp mắt mà còn bền bỉ và
+						tiện dụng.
 					</p>
 					<h3 className="text-center my-5 font-serif italic">
 						'LOREM IPSUM DOLOR SIT AMET'
 					</h3>
 					<p className="text-sm text-gray-700">
-						Mô tả ngắn gọn về sản phẩm Mô tả ngắn gọn về sản phẩm Mô tả ngắn gọn
-						về sản phẩm Mô tả ngắn gọn về sản phẩm Mô tả ngắn gọn về sản phẩm Mô
-						tả ngắn gọn về sản phẩm Mô tả ngắn gọn về sản phẩm...
+						Được chế tạo với sự tỉ mỉ và chú trọng đến từng chi tiết, sản phẩm
+						không chỉ đẹp mắt mà còn vô cùng tiện dụng. Các tính năng thông minh
+						được tích hợp giúp đơn giản hóa cuộc sống, tiết kiệm thời gian và
+						công sức. Sự hài lòng của khách hàng là ưu tiên hàng đầu, vì vậy
+						chúng tôi luôn nỗ lực cải tiến để mang đến những giá trị tốt đẹp
+						nhất. Lựa chọn sản phẩm này là lựa chọn sự tiện nghi, đẳng cấp và
+						hiệu quả dài lâu. Nguồn và nội dung liên quan
 					</p>
 					<hr className="border-black my-4 w-1/2 border-[1px]" />
 					<p className="font-semibold font-serif">JEIFY JEWELRY</p>
@@ -49,7 +57,7 @@ const AboutUs = () => {
 				{/* Cột phải: hình ảnh */}
 				<div className="w-full md:w-1/2 h-full">
 					<img
-						src="https://via.placeholder.com/400x300.png?text=Jewelry+Image"
+						src={img}
 						alt="Jewelry product image"
 						className="object-cover w-full h-full"
 					/>
@@ -67,9 +75,9 @@ const AboutUs = () => {
 						{/* Hình ảnh bị chồng một phần lên khối xám */}
 						<div className="absolute left-[55%] w-[200px] h-[150px] bg-white shadow-md flex items-center justify-center">
 							<img
-								src="https://via.placeholder.com/150"
+								src={logo}
 								alt="overlap"
-								className="w-full h-full object-cover"
+								className="w-full h-full object-center"
 							/>
 						</div>
 					</div>
@@ -137,9 +145,12 @@ const AboutUs = () => {
 
 				{/* ORDER NOW button */}
 				<div>
-					<button className="bg-primary hover:opacity-90 px-8 py-2 font-semibold">
+					<Link
+						to={'/'}
+						className="bg-primary hover:opacity-90 px-8 py-4 font-semibold"
+					>
 						ORDER NOW
-					</button>
+					</Link>
 				</div>
 			</section>
 		</div>

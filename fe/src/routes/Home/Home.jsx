@@ -6,6 +6,7 @@ import InfoSection from './InfoSection'
 import BestSeller from './BestSeller'
 import Contact from './Contact'
 import ProductList from '../ListProduct/ProductList'
+import { Link } from 'react-router-dom'
 export default function Home() {
 	return (
 		<Transition className="flex justify-center items-center flex-col">
@@ -15,6 +16,7 @@ export default function Home() {
 			<Products />
 			<InfoSection />
 
+			<Link to={'/aboutus'} className='p-4 mb-3 rounded-2xl bg-primary'>Về chúng tôi</Link>
 			<Contact />
 		</Transition>
 	)

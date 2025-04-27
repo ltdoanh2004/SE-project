@@ -4,7 +4,7 @@ import { FaPaperPlane } from 'react-icons/fa'
 export default function Contact() {
 	return (
 		<Transition className="flex items-center justify-center flex-col w-full">
-			<div className="bg-[#C6A969] text-white p-10 w-full">
+			<div className="bg-primary text-black p-10 w-full">
 				<div className="container mx-auto">
 					<div className="flex flex-col md:flex-row items-center justify-between">
 						<div className="md:flex-1">
