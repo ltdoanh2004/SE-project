@@ -9,8 +9,14 @@ import {
 	PanelRight,
 	X,
 } from 'lucide-react'
+import axios from 'axios'
 
-const ChatPage = () => {
+// Shared API URL configuration
+const BASE_URL = window.location.hostname === 'localhost' ? 'http://localhost:8000' : 'https://your-backend-url.com';
+const API_URL = `${BASE_URL}/api`;
+console.log("ChatPage loaded with API URL:", API_URL);
+
+const ChatPage = ({ minimized = false, onClose }) => {
 	const [messages, setMessages] = useState([])
 	const [input, setInput] = useState('')
 	const [isLoading, setIsLoading] = useState(false)
@@ -44,25 +50,39 @@ const ChatPage = () => {
 		setIsLoading(true)
 
 		try {
-			// This is where you'll integrate your AI service in the future
-			// For now, we'll simulate a response
-			await new Promise((resolve) => setTimeout(resolve, 1000))
+			console.log("Sending message to chatbot API:", input);
+			
+			// Call the backend API
+			const response = await axios.post(`${API_URL}/chatbot/product-search`, {
+				query: input,
+			});
 
+			console.log("Response from chatbot API:", response.data);
+			
+			// Create a response with products if available
+			let aiResponseText = "I found some items that might interest you!";
+			
+			if (!response.data.success || !response.data.products || response.data.products.length === 0) {
+				aiResponseText = "I couldn't find any products matching your criteria. Could you try a different search?";
+			}
+			
 			const aiResponse = {
 				id: Date.now() + 1,
-				text: `This is a simulated AI response to: "${input}"`,
+				text: aiResponseText,
 				sender: 'ai',
 				timestamp: new Date().toISOString(),
+				products: response.data.products || []
 			}
 
 			setMessages((prevMessages) => [...prevMessages, aiResponse])
 		} catch (error) {
-			console.error('Error getting AI response:', error)
+			console.error('Error getting AI response:', error);
+			
 			setMessages((prevMessages) => [
 				...prevMessages,
 				{
 					id: Date.now() + 1,
-					text: 'Sorry, I encountered an error processing your request.',
+					text: 'Sorry, I encountered an error processing your request. Please try again later.',
 					sender: 'ai',
 					isError: true,
 					timestamp: new Date().toISOString(),
@@ -82,38 +102,43 @@ const ChatPage = () => {
 		return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 	}
 
+	const formatPrice = (price) => {
+		return new Intl.NumberFormat('en-US', {
+			style: 'currency',
+			currency: 'USD'
+		}).format(price);
+	};
+
 	return (
-		<div className="absolute h-144 shadow-md flex flex-col">
+		<div className={`${minimized ? '' : 'absolute'} h-full w-full shadow-md flex flex-col`}>
 			{/* Chat header */}
 			<div className="bg-primary text-white p-4 flex justify-between items-center shadow-md">
 				<div className="flex items-center space-x-2">
 					<Bot size={24} />
-					<h1 className="text-xl font-semibold">AI Assistant</h1>
+					<h1 className="text-xl font-semibold">Customer Support</h1>
 				</div>
 				<div className="flex space-x-2">
-					{/* <button
+					<button
 						onClick={clearChat}
-						className="p-2 mr-3 hover:bg-primary-dark rounded-full transition-colors"
+						className="p-2 hover:bg-primary-dark rounded-full transition-colors"
 						title="Clear chat"
 					>
 						<Trash size={20} />
-					</button> */}
-					<button
-						onClick={() => setIsChatOpen(!isChatOpen)}
-						className="p-2 hover:bg-primary-dark rounded-full transition-colors lg:hidden"
-						title={isChatOpen ? 'Close chat' : 'Open chat'}
-					>
-						{isChatOpen ? <X size={20} /> : <PanelRight size={20} />}
 					</button>
+					{onClose && (
+						<button
+							onClick={onClose}
+							className="p-2 hover:bg-primary-dark rounded-full transition-colors"
+							title="Close chat"
+						>
+							<X size={20} />
+						</button>
+					)}
 				</div>
 			</div>
 
 			{/* Chat container */}
-			<div
-				className={`flex-grow overflow-y-auto p-4 bg-gray-50 ${
-					isChatOpen ? 'block' : 'hidden lg:block'
-				}`}
-			>
+			<div className="flex-grow overflow-y-auto p-4 bg-gray-50">
 				{messages.length === 0 ? (
 					<div className="flex flex-col items-center justify-center h-full text-gray-500">
 						<Bot size={48} className="mb-4" />
@@ -152,6 +177,32 @@ const ChatPage = () => {
 									</div>
 									<div className="flex-1">
 										<div className="whitespace-pre-wrap">{message.text}</div>
+										
+										{/* Product recommendations */}
+										{message.products && message.products.length > 0 && (
+											<div className="mt-3 space-y-2">
+												{message.products.slice(0, 3).map((product, idx) => (
+													<a
+														key={idx}
+														href={product.link}
+														className="block p-2 border rounded hover:bg-gray-50 transition"
+													>
+														<div className="flex">
+															{product.image && (
+																<div className="w-14 h-14 bg-gray-100 rounded overflow-hidden mr-3">
+																	<img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+																</div>
+															)}
+															<div>
+																<div className="font-medium text-primary">{product.name}</div>
+																<div className="text-sm text-gray-600">{formatPrice(product.price)}</div>
+															</div>
+														</div>
+													</a>
+												))}
+											</div>
+										)}
+										
 										<div
 											className={`text-xs mt-1 ${
 												message.sender === 'user'
@@ -179,11 +230,7 @@ const ChatPage = () => {
 			</div>
 
 			{/* Input area */}
-			<div
-				className={`bg-white border-t border-gray-200 p-4 ${
-					isChatOpen ? 'block' : 'hidden lg:block'
-				}`}
-			>
+			<div className="bg-white border-t border-gray-200 p-4">
 				<form onSubmit={handleSendMessage} className="flex space-x-2">
 					<input
 						type="text"
@@ -209,21 +256,7 @@ const ChatPage = () => {
 						)}
 					</button>
 				</form>
-				<p className="text-xs text-gray-500 mt-2 text-center">
-					AI responses are simulated. Integration with actual AI services coming
-					soon.
-				</p>
 			</div>
-
-			{/* Mobile chat toggle button (fixed at bottom right when chat is closed) */}
-			{!isChatOpen && (
-				<button
-					onClick={() => setIsChatOpen(true)}
-					className="fixed bottom-6 right-6 bg-primary text-white p-4 rounded-full shadow-lg lg:hidden z-50"
-				>
-					<Bot size={24} />
-				</button>
-			)}
 		</div>
 	)
 }
