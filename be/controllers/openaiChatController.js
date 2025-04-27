@@ -154,9 +154,13 @@ const searchProductsHelper = async (type = null, material = null, priceRange = n
       limit: 3 // Limit to 3 results as recommended
     });
 
+    // Biến để theo dõi nếu đây là sản phẩm thực tế hay mẫu
+    let usingDummyData = false;
+
     // Nếu không tìm thấy sản phẩm nào, trả về sản phẩm mẫu phù hợp với filters
     if (products.length === 0) {
       console.log("No products found in database, using sample data with filters:", { type, material, priceRange, style });
+      usingDummyData = true;
       
       // Tạo sản phẩm mẫu dựa trên filters
       const sampleProducts = [];
@@ -240,27 +244,39 @@ const searchProductsHelper = async (type = null, material = null, priceRange = n
         });
       }
       
-      return sampleProducts.slice(0, 3);
+      return {
+        products: sampleProducts.slice(0, 3),
+        exactMatch: false,
+        usingDummyData: true
+      };
     }
 
     // Format response
-    return products.map(product => ({
-      name: product.name,
-      description: product.productDescription,
-      price: product.price,
-      link: `${FRONTEND_URL}/product/${product.productID}`,
-      image: product.images && product.images.length > 0 ? product.images[0] : null
-    }));
+    return {
+      products: products.map(product => ({
+        name: product.name,
+        description: product.productDescription,
+        price: product.price,
+        link: `${FRONTEND_URL}/product/${product.productID}`,
+        image: product.images && product.images.length > 0 ? product.images[0] : null
+      })),
+      exactMatch: true,
+      usingDummyData: false
+    };
   } catch (error) {
     console.error("Product search error:", error);
-    return [];
+    return {
+      products: [],
+      exactMatch: false,
+      usingDummyData: false
+    };
   }
 };
 
 // Hàm xử lý tin nhắn với OpenAI
 export const processMessage = async (req, res) => {
   try {
-    const { message, conversationHistory = [] } = req.body;
+    const { message, conversationHistory = [], instructions = "" } = req.body;
 
     // Validate message
     if (!message) {
@@ -286,6 +302,9 @@ export const processMessage = async (req, res) => {
 ${featuredProducts.map(p => `- ID: ${p.id}, Name: "${p.name}", Type: ${p.type || 'N/A'}, Material: ${p.material || 'N/A'}, Price: $${p.price}, URL: ${p.url}, Description: ${p.description}`).join('\n')}`
       : "We currently don't have any featured products to recommend.";
 
+    // Thêm hướng dẫn bổ sung về việc xử lý khi không tìm thấy sản phẩm
+    const noProductInstructions = instructions || "Nếu không tìm thấy sản phẩm phù hợp, hãy thông báo cho khách hàng rằng cửa hàng hiện không có sản phẩm đó và đề xuất một vài sản phẩm thay thế tương tự.";
+
     // Create messages for the conversation
     const systemPrompt = {
       role: "system", 
@@ -309,6 +328,7 @@ Important behaviors:
 - If the customer seems excited, provide gentle encouragement.
 - If the customer is hesitating, offer warm reassurance and propose alternatives.
 - Always focus only on jewelry and the store, avoid unrelated topics.
+- ${noProductInstructions}
 - Your task is to understand their needs and extract ONLY these filters if present:
   - type: the type of jewelry (ring, necklace, bracelet, earring, etc.)
   - material: material of the jewelry (gold, silver, platinum, diamond, etc.)
@@ -388,7 +408,7 @@ Your response MUST use the following JSON format:
       };
 
       // Search for products with suggested filters
-      const products = await searchProductsHelper(
+      const searchResult = await searchProductsHelper(
         filters.type,
         filters.material,
         filters.priceRange,
@@ -399,8 +419,10 @@ Your response MUST use the following JSON format:
       res.status(200).json({
         success: true,
         reply: parsedResponse.text,
-        products: products,
-        filters: filters
+        products: searchResult.products,
+        filters: filters,
+        exactMatch: searchResult.exactMatch,
+        usingDummyData: searchResult.usingDummyData
       });
       
     } catch (openaiError) {

@@ -55,16 +55,20 @@ const ChatbotOpenAI = ({ embedded = false }) => {
   const renderMessageContent = (content) => {
     if (!content) return '';
     
-    // Regex để tìm URL trong văn bản, bao gồm cả URL trong ngoặc vuông
+    // Chuỗi regex cải tiến để phát hiện tất cả các loại URL, kể cả URL trong ngoặc vuông và văn bản Việt hóa
     const urlRegex = /(\[.*?\])?\((https?:\/\/[^\s\)]+)\)|(?<!\()(https?:\/\/[^\s]+)(?!\))/g;
     
-    // Replace URL với anchor tag
+    // Regex riêng để phát hiện định dạng tên sản phẩm trong ngoặc vuông
+    const productLinkRegex = /\[(.*?)\](?!\()/g;
+    
+    // Xử lý URL thông thường trước
     const parts = [];
     let lastIndex = 0;
     let match;
     
     content = content.toString();
     
+    // Xử lý các URL thông thường và URL trong định dạng Markdown
     while ((match = urlRegex.exec(content)) !== null) {
       // Văn bản trước URL
       if (match.index > lastIndex) {
@@ -77,7 +81,7 @@ const ChatbotOpenAI = ({ embedded = false }) => {
         const url = match[2];
         parts.push(
           <a 
-            key={match.index}
+            key={`url-${match.index}`}
             href={url} 
             className="text-blue-600 hover:underline"
             target="_blank"
@@ -92,7 +96,7 @@ const ChatbotOpenAI = ({ embedded = false }) => {
         const url = match[3] || match[0];
         parts.push(
           <a 
-            key={match.index}
+            key={`url-${match.index}`}
             href={url} 
             className="text-blue-600 hover:underline"
             target="_blank"
@@ -108,7 +112,66 @@ const ChatbotOpenAI = ({ embedded = false }) => {
     
     // Văn bản còn lại sau URL cuối cùng
     if (lastIndex < content.length) {
-      parts.push(content.substring(lastIndex));
+      const remainingText = content.substring(lastIndex);
+      
+      // Xử lý các tên sản phẩm trong ngoặc vuông không có URL đi kèm
+      let productParts = [];
+      let productLastIndex = 0;
+      let productMatch;
+      
+      while ((productMatch = productLinkRegex.exec(remainingText)) !== null) {
+        // Văn bản trước tên sản phẩm
+        if (productMatch.index > productLastIndex) {
+          productParts.push(remainingText.substring(productLastIndex, productMatch.index));
+        }
+        
+        // Tạo URL cho sản phẩm dựa trên tên
+        const productName = productMatch[1];
+        // Giả định URL sản phẩm dựa trên tên sản phẩm
+        let productUrl = '';
+        
+        // Logic để xác định URL sản phẩm dựa trên tên
+        if (productName.toLowerCase().includes('nhẫn') && productName.toLowerCase().includes('vàng')) {
+          productUrl = '/product/1';
+        } else if (productName.toLowerCase().includes('nhẫn') && productName.toLowerCase().includes('bạc')) {
+          productUrl = '/product/2';
+        } else if (productName.toLowerCase().includes('dây chuyền') && productName.toLowerCase().includes('vàng')) {
+          productUrl = '/product/3';
+        } else if (productName.toLowerCase().includes('dây chuyền') && productName.toLowerCase().includes('bạc')) {
+          productUrl = '/product/4';
+        } else if (productName.toLowerCase().includes('bông tai')) {
+          productUrl = '/product/5';
+        } else {
+          // Mặc định sử dụng tìm kiếm nếu không khớp với sản phẩm cụ thể
+          productUrl = `/search?q=${encodeURIComponent(productName)}`;
+        }
+        
+        productParts.push(
+          <a 
+            key={`product-${productMatch.index}`}
+            href={productUrl} 
+            className="text-blue-600 hover:underline"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {productName}
+          </a>
+        );
+        
+        productLastIndex = productMatch.index + productMatch[0].length;
+      }
+      
+      // Văn bản còn lại sau tên sản phẩm cuối cùng
+      if (productLastIndex < remainingText.length) {
+        productParts.push(remainingText.substring(productLastIndex));
+      }
+      
+      // Thêm các phần xử lý tên sản phẩm vào kết quả cuối cùng
+      if (productParts.length > 0) {
+        parts.push(...productParts);
+      } else {
+        parts.push(remainingText);
+      }
     }
     
     return parts.length ? parts : content;
@@ -136,27 +199,43 @@ const ChatbotOpenAI = ({ embedded = false }) => {
       // Call OpenAI API
       const response = await axios.post(`${API_URL}/chatbot/openai`, {
         message: userMessage,
-        conversationHistory
+        conversationHistory,
+        instructions: "Nếu không tìm thấy sản phẩm phù hợp với yêu cầu của khách hàng, hãy thông báo rõ ràng rằng cửa hàng hiện không có sản phẩm đó và đề xuất một vài sản phẩm thay thế tương tự. Giải thích tại sao các sản phẩm thay thế có thể phù hợp với nhu cầu của họ."
       });
 
       console.log("API response:", response.data);
 
-      const { reply, products, filters } = response.data;
+      const { reply, products, filters, exactMatch, usingDummyData } = response.data;
       
-      // Chỉ hiển thị sản phẩm khi người dùng yêu cầu (kiểm tra nội dung tin nhắn)
-      const showProducts = userMessage.toLowerCase().includes('show') || 
+      // Kiểm tra xem đã có yêu cầu tìm sản phẩm chưa
+      const isProductRequest = userMessage.toLowerCase().includes('show') || 
                          userMessage.toLowerCase().includes('find') || 
                          userMessage.toLowerCase().includes('search') || 
                          userMessage.toLowerCase().includes('product') ||
                          userMessage.toLowerCase().includes('jewelry') ||
-                         userMessage.toLowerCase().includes('recommend');
+                         userMessage.toLowerCase().includes('recommend') ||
+                         userMessage.toLowerCase().includes('nhẫn') ||
+                         userMessage.toLowerCase().includes('dây') ||
+                         userMessage.toLowerCase().includes('bông tai') ||
+                         userMessage.toLowerCase().includes('bạc') ||
+                         userMessage.toLowerCase().includes('vàng');
+      
+      // Điều chỉnh tin nhắn khi không có sản phẩm phù hợp chính xác
+      let finalReply = reply;
+      if (isProductRequest && !exactMatch && usingDummyData) {
+        if (!reply.toLowerCase().includes('không có') && 
+            !reply.toLowerCase().includes('không tìm thấy') && 
+            !reply.toLowerCase().includes('chưa có')) {
+          finalReply = `Xin lỗi, hiện tại chúng tôi không có chính xác sản phẩm bạn yêu cầu. ${reply}`;
+        }
+      }
       
       // Add bot message with delay for realistic typing effect
       setTimeout(() => {
         setMessages(prev => [...prev, { 
           role: 'assistant', 
-          content: reply, 
-          products: showProducts ? (products || []) : [],
+          content: finalReply, 
+          products: isProductRequest ? (products || []) : [],
           filters
         }]);
         setIsTyping(false);
@@ -170,7 +249,7 @@ const ChatbotOpenAI = ({ embedded = false }) => {
       setTimeout(() => {
         setMessages(prev => [...prev, { 
           role: 'assistant',
-          content: "I apologize, but I'm having trouble connecting to our product database right now. Please try again later or contact customer support for assistance.", 
+          content: "Xin lỗi, hiện tại tôi không thể kết nối với cơ sở dữ liệu sản phẩm. Vui lòng thử lại sau hoặc liên hệ với bộ phận hỗ trợ khách hàng.", 
           products: [] 
         }]);
         setIsTyping(false);
