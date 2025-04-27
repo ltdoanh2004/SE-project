@@ -2,11 +2,14 @@ import React from 'react'
 import { FaRegTrashAlt } from 'react-icons/fa'
 import { FaMinus, FaPlus } from 'react-icons/fa6'
 import { Link } from 'react-router-dom'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import Contact from '../Home/Contact'
+import { removeFromCart, updateQuantity } from '../../redux/actions/cartActions'
+import { ArrowRight } from 'lucide-react'
 
 const Cart = () => {
 	const cartItems = useSelector((state) => state.cart.items)
+	const dispatch = useDispatch()
 
 	// Calculate subtotal
 	const subtotal = cartItems.reduce(
@@ -17,12 +20,25 @@ const Cart = () => {
 	const discount = 0
 	const total = subtotal + deliveryFee - discount
 
+	const handleRemove = (item) => {
+		// Dispatch an action to remove the item from the cart
+		dispatch(removeFromCart(item.id))
+	}
+
+	const handlechangeQuantity = (item, quantity) => {
+		// Dispatch an action to remove the item from the cart
+		console.log(item.quantity)
+		if(item.quantity < 1) {
+			dispatch(removeFromCart(item.id))
+			}
+		dispatch(updateQuantity(item.id, quantity))
+	}
 	return (
 		<>
 			<div className="container mx-auto py-12">
 				<div className="bg-gray-100 py-10 px-12 rounded-xl">
 					<h1 className="text-center font-semibold text-2xl mb-4">
-						Your Shopping Cart
+						Giỏ hàng của bạn
 					</h1>
 
 					<table className="w-full">
@@ -36,14 +52,14 @@ const Cart = () => {
 											htmlFor="select-all"
 											className="font-normal select-none cursor-pointer"
 										>
-											Select all
+											Chọn tất cả
 										</label>
 									</div>
 								</th>
 
 								<th className="border-b border-gray-500 py-4 text-left">
 									<p className="bg-primary font-semibold w-32 px-2 text-center py-2 rounded-xl inline-block">
-										Price
+										Giá
 									</p>
 								</th>
 
@@ -70,14 +86,21 @@ const Cart = () => {
 													<p className="text-lg font-medium mb-2">
 														{item.name}
 													</p>
-													<p>Product id: {item.id}</p>
+													<p>Mã sản phẩm: {item.id}</p>
 
 													<form
 														action=""
 														className="inline-flex items-center border rounded border-black h-10 mt-4"
 													>
 														<div className="px-3 cursor-pointer">
-															<FaPlus />
+															<button
+																onClick={(e) => {
+																	e.preventDefault()
+																	handlechangeQuantity(item, item.quantity + 1)
+																}}
+															>
+																<FaPlus />
+															</button>
 														</div>
 
 														<input
@@ -88,7 +111,14 @@ const Cart = () => {
 														/>
 
 														<div className="px-3 cursor-pointer">
-															<FaMinus />
+															<button
+																onClick={(e) => {
+																	e.preventDefault()
+																	handlechangeQuantity(item, item.quantity - 1)
+																}}
+															>
+																<FaMinus />
+															</button>
 														</div>
 													</form>
 												</div>
@@ -97,21 +127,27 @@ const Cart = () => {
 
 										<td className="border-b border-gray-500 py-4">
 											<p className="font-semibold">
-												{item.price.toLocaleString()} VND
+												{(item.price * item.quantity).toLocaleString()} VND
 											</p>
 										</td>
 
 										<td className="border-b border-gray-500 py-4">
-											<FaRegTrashAlt className="cursor-pointer" />
+											<button
+												onClick={() => {
+													handleRemove(item)
+												}}
+											>
+												<FaRegTrashAlt className="cursor-pointer" />
+											</button>
 										</td>
 									</tr>
 								))
 							) : (
 								<tr>
 									<td colSpan={4} className="py-8 text-center">
-										Your cart is empty.{' '}
+										Giỏ hàng của bạn đang trống.{' '}
 										<Link to="/" className="text-blue-500 underline">
-											Continue shopping
+											Tiếp tục mua sắm
 										</Link>
 									</td>
 								</tr>
@@ -128,28 +164,28 @@ const Cart = () => {
 					</div>
 
 					<div className="flex items-center py-1 justify-between font-semibold">
-						<p>Subtotal:</p>
+						<p>Tổng đơn hàng:</p>
 						<p>{subtotal.toLocaleString()} VND</p>
 					</div>
 					<div className="flex items-center py-1 justify-between font-semibold">
-						<p>Discount:</p>
+						<p>Giảm giá:</p>
 						<p>0.00 %</p>
 					</div>
 					<div className="flex items-center py-1 justify-between font-semibold">
-						<p>Delivery payment:</p>
+						<p>Phí vận chuyển:</p>
 						<p>{deliveryFee.toLocaleString()} VND</p>
 					</div>
 					<div className="flex items-center py-1 justify-between font-semibold">
-						<p>Total:</p>
+						<p>Tổng cộng:</p>
 						<p className="bg-primary font-semibold px-6 text-center py-3 rounded-xl">
 							{total.toLocaleString()} VND
 						</p>
 					</div>
 
-					<div className="text-center mt-4">
+					<div className="text-center mt-4 hover:cursor-pointer">
 						<Link to="/payment">
-							<p className="bg-primary font-semibold px-12 text-center py-3 rounded-xl inline-block">
-								Go to payment &gt;
+							<p className="bg-primary hover:bg-secondary font-semibold px-12 text-center py-3 rounded-xl inline-block">
+								Thanh toán <ArrowRight className="inline-block mb-[1px] ml-1" />
 							</p>
 						</Link>
 					</div>
