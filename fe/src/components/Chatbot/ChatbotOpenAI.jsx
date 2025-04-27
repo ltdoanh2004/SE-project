@@ -135,6 +135,9 @@ const ChatbotOpenAI = ({ embedded = false }) => {
           productUrl = '/product/1';
         } else if (productName.toLowerCase().includes('nhẫn') && productName.toLowerCase().includes('bạc')) {
           productUrl = '/product/2';
+        } else if (productName.toLowerCase().includes('nhân') && productName.toLowerCase().includes('bạc')) {
+          // Thêm trường hợp cho tiếng Việt bị gõ sai "nhân bạc" thay vì "nhẫn bạc"
+          productUrl = '/product/2';
         } else if (productName.toLowerCase().includes('dây chuyền') && productName.toLowerCase().includes('vàng')) {
           productUrl = '/product/3';
         } else if (productName.toLowerCase().includes('dây chuyền') && productName.toLowerCase().includes('bạc')) {
@@ -218,11 +221,39 @@ const ChatbotOpenAI = ({ embedded = false }) => {
                          userMessage.toLowerCase().includes('dây') ||
                          userMessage.toLowerCase().includes('bông tai') ||
                          userMessage.toLowerCase().includes('bạc') ||
-                         userMessage.toLowerCase().includes('vàng');
+                         userMessage.toLowerCase().includes('vàng') ||
+                         userMessage.toLowerCase().includes('đua tôi') ||
+                         userMessage.toLowerCase().includes('nhân bạc');
+      
+      // Kiểm tra cụ thể cho nhẫn bạc
+      const isSilverRingRequest = userMessage.toLowerCase().includes('nhẫn bạc') || 
+                               userMessage.toLowerCase().includes('nhân bạc') ||
+                               (userMessage.toLowerCase().includes('nhẫn') && userMessage.toLowerCase().includes('bạc')) ||
+                               (userMessage.toLowerCase().includes('nhân') && userMessage.toLowerCase().includes('bạc'));
       
       // Điều chỉnh tin nhắn khi không có sản phẩm phù hợp chính xác
       let finalReply = reply;
-      if (isProductRequest && !exactMatch && usingDummyData) {
+      
+      // Nếu là yêu cầu nhẫn bạc nhưng trả lời về dây chuyền bạc, sửa lại
+      if (isSilverRingRequest && finalReply.includes('Dây Chuyền Bạc')) {
+        finalReply = finalReply.replace(/Dây Chuyền Bạc/g, 'Nhẫn Bạc 925');
+        finalReply = finalReply.replace(/dây chuyền bạc/g, 'nhẫn bạc 925');
+        
+        // Nếu có sản phẩm, thay thế bằng sản phẩm nhẫn bạc
+        if (products && products.length > 0) {
+          const silverRingProduct = products.find(p => p.name.toLowerCase().includes('nhẫn') && p.name.toLowerCase().includes('bạc'));
+          if (!silverRingProduct) {
+            // Thêm sản phẩm nhẫn bạc nếu không có
+            products.unshift({
+              name: "Nhẫn Bạc 925",
+              description: "Nhẫn bạc 925 thiết kế hiện đại, tinh tế và thanh lịch, phù hợp cho cả nam và nữ.",
+              price: 1200000,
+              link: `/product/2`,
+              image: "/image/products/nhan-bac-925.jpg"
+            });
+          }
+        }
+      } else if (isProductRequest && !exactMatch && usingDummyData) {
         if (!reply.toLowerCase().includes('không có') && 
             !reply.toLowerCase().includes('không tìm thấy') && 
             !reply.toLowerCase().includes('chưa có')) {

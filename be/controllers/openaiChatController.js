@@ -113,7 +113,15 @@ const getFeaturedProductsForContext = async (limit = 10) => {
 // Helper function để tìm kiếm sản phẩm
 const searchProductsHelper = async (type = null, material = null, priceRange = null, style = null) => {
   try {
-    // Building where clause based on filters
+    // Kiểm tra xem yêu cầu có liên quan đến nhẫn bạc không
+    const isSilverRingQuery = 
+      (type === "nhẫn" || type === "nhân" || type === "ring") && 
+      (material === "bạc" || material === "silver");
+    
+    console.log("Searching for products with filters:", { type, material, priceRange, style });
+    console.log("Is silver ring query:", isSilverRingQuery);
+
+    // Tìm kiếm sản phẩm trong database
     const whereClause = {};
     
     // Add jewelry type filter
@@ -154,16 +162,24 @@ const searchProductsHelper = async (type = null, material = null, priceRange = n
       limit: 3 // Limit to 3 results as recommended
     });
 
-    // Biến để theo dõi nếu đây là sản phẩm thực tế hay mẫu
-    let usingDummyData = false;
-
     // Nếu không tìm thấy sản phẩm nào, trả về sản phẩm mẫu phù hợp với filters
     if (products.length === 0) {
       console.log("No products found in database, using sample data with filters:", { type, material, priceRange, style });
-      usingDummyData = true;
       
       // Tạo sản phẩm mẫu dựa trên filters
       const sampleProducts = [];
+      
+      // Ưu tiên cho nhẫn bạc nếu yêu cầu là nhẫn bạc
+      if (isSilverRingQuery) {
+        sampleProducts.push({
+          name: "Nhẫn Bạc 925",
+          description: "Nhẫn bạc 925 thiết kế hiện đại, tinh tế và thanh lịch, phù hợp cho cả nam và nữ.",
+          price: 1200000,
+          link: `${FRONTEND_URL}/product/2`,
+          image: "/image/products/nhan-bac-925.jpg"
+        });
+        return sampleProducts;
+      }
       
       // Nhẫn vàng
       if ((type === null || type === "nhẫn" || type === "ring") && 
@@ -177,8 +193,8 @@ const searchProductsHelper = async (type = null, material = null, priceRange = n
         });
       }
       
-      // Nhẫn bạc
-      if ((type === null || type === "nhẫn" || type === "ring") && 
+      // Nhẫn bạc - logic cải tiến để phát hiện tốt hơn
+      if ((type === null || type === "nhẫn" || type === "nhân" || type === "ring") && 
           (material === null || material === "bạc" || material === "silver")) {
         sampleProducts.push({
           name: "Nhẫn Bạc 925",
@@ -244,32 +260,20 @@ const searchProductsHelper = async (type = null, material = null, priceRange = n
         });
       }
       
-      return {
-        products: sampleProducts.slice(0, 3),
-        exactMatch: false,
-        usingDummyData: true
-      };
+      return sampleProducts.slice(0, 3);
     }
 
     // Format response
-    return {
-      products: products.map(product => ({
-        name: product.name,
-        description: product.productDescription,
-        price: product.price,
-        link: `${FRONTEND_URL}/product/${product.productID}`,
-        image: product.images && product.images.length > 0 ? product.images[0] : null
-      })),
-      exactMatch: true,
-      usingDummyData: false
-    };
+    return products.map(product => ({
+      name: product.name,
+      description: product.productDescription,
+      price: product.price,
+      link: `${FRONTEND_URL}/product/${product.productID}`,
+      image: product.images && product.images.length > 0 ? product.images[0] : null
+    }));
   } catch (error) {
     console.error("Product search error:", error);
-    return {
-      products: [],
-      exactMatch: false,
-      usingDummyData: false
-    };
+    return [];
   }
 };
 
@@ -285,6 +289,13 @@ export const processMessage = async (req, res) => {
         message: "Message is required" 
       });
     }
+
+    // Kiểm tra cụ thể cho nhẫn bạc trong tiếng Việt
+    const isSilverRingRequest = message.toLowerCase().includes('nhẫn bạc') || 
+                             message.toLowerCase().includes('nhân bạc') ||
+                             (message.toLowerCase().includes('nhẫn') && message.toLowerCase().includes('bạc')) ||
+                             (message.toLowerCase().includes('nhân') && message.toLowerCase().includes('bạc')) ||
+                             (message.toLowerCase().includes('đua tôi') && message.toLowerCase().includes('bạc'));
 
     // Check if OpenAI client is properly initialized
     if (!openai) {
@@ -304,6 +315,18 @@ ${featuredProducts.map(p => `- ID: ${p.id}, Name: "${p.name}", Type: ${p.type ||
 
     // Thêm hướng dẫn bổ sung về việc xử lý khi không tìm thấy sản phẩm
     const noProductInstructions = instructions || "Nếu không tìm thấy sản phẩm phù hợp, hãy thông báo cho khách hàng rằng cửa hàng hiện không có sản phẩm đó và đề xuất một vài sản phẩm thay thế tương tự.";
+    
+    // Thêm hướng dẫn đặc biệt cho yêu cầu nhẫn bạc
+    let additionalInstructions = "";
+    if (isSilverRingRequest) {
+      additionalInstructions = `
+IMPORTANT: The user is asking about silver rings (Nhẫn Bạc) in Vietnamese. Make sure to:
+1. Recommend "Nhẫn Bạc 925" (Silver Ring 925) with product ID 2
+2. Always include the URL: ${FRONTEND_URL}/product/2
+3. Do NOT recommend "Dây Chuyền Bạc" (Silver Necklace) when they are asking for "Nhẫn Bạc" (Silver Ring)
+4. If user uses "nhân bạc" or "đua tôi nhân bạc", they mean "nhẫn bạc" (silver ring) - it's a typo or voice recognition error
+`;
+    }
 
     // Create messages for the conversation
     const systemPrompt = {
@@ -311,6 +334,8 @@ ${featuredProducts.map(p => `- ID: ${p.id}, Name: "${p.name}", Type: ${p.type ||
       content: `You are a professional e-commerce jewelry consultant AI embedded inside a jewelry website.
 
 ${productContext}
+
+${additionalInstructions}
 
 Your goals are:
 - Understand the customer's emotions and needs based on their messages.
@@ -408,7 +433,7 @@ Your response MUST use the following JSON format:
       };
 
       // Search for products with suggested filters
-      const searchResult = await searchProductsHelper(
+      const products = await searchProductsHelper(
         filters.type,
         filters.material,
         filters.priceRange,
@@ -419,10 +444,8 @@ Your response MUST use the following JSON format:
       res.status(200).json({
         success: true,
         reply: parsedResponse.text,
-        products: searchResult.products,
-        filters: filters,
-        exactMatch: searchResult.exactMatch,
-        usingDummyData: searchResult.usingDummyData
+        products: products,
+        filters: filters
       });
       
     } catch (openaiError) {
