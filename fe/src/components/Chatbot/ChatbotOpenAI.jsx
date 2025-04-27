@@ -17,7 +17,7 @@ const ChatbotOpenAI = ({ embedded = false }) => {
   const [messages, setMessages] = useState([
     { 
       role: 'assistant',
-      content: 'Hello! 👋 I\'m your jewelry consultant. How can I help you find the perfect piece today?', 
+      content: 'Hello! 👋 I\'m your jewelry consultant. How can I help you today?', 
       products: [] 
     }
   ]);
@@ -80,12 +80,20 @@ const ChatbotOpenAI = ({ embedded = false }) => {
 
       const { reply, products, filters } = response.data;
       
+      // Chỉ hiển thị sản phẩm khi người dùng yêu cầu (kiểm tra nội dung tin nhắn)
+      const showProducts = userMessage.toLowerCase().includes('show') || 
+                         userMessage.toLowerCase().includes('find') || 
+                         userMessage.toLowerCase().includes('search') || 
+                         userMessage.toLowerCase().includes('product') ||
+                         userMessage.toLowerCase().includes('jewelry') ||
+                         userMessage.toLowerCase().includes('recommend');
+      
       // Add bot message with delay for realistic typing effect
       setTimeout(() => {
         setMessages(prev => [...prev, { 
           role: 'assistant', 
           content: reply, 
-          products: products || [],
+          products: showProducts ? (products || []) : [],
           filters
         }]);
         setIsTyping(false);
@@ -209,7 +217,7 @@ const ChatbotOpenAI = ({ embedded = false }) => {
       {/* Chat toggle button */}
       <button 
         onClick={toggleChat}
-        className="flex items-center justify-center p-4 bg-primary hover:bg-secondary text-black hover:text-white rounded-full shadow-lg transition-all duration-300"
+        className="flex items-center justify-center p-4 bg-yellow-500 hover:bg-yellow-600 text-black hover:text-white rounded-full shadow-lg transition-all duration-300"
       >
         {isOpen ? (
           <RiCloseLine size={24} />
@@ -222,9 +230,9 @@ const ChatbotOpenAI = ({ embedded = false }) => {
       {isOpen && (
         <div className="absolute bottom-16 right-0 w-80 sm:w-96 h-[500px] bg-white rounded-lg shadow-2xl flex flex-col overflow-hidden border border-gray-200">
           {/* Chat header */}
-          <div className="bg-primary text-black p-4 flex items-center">
+          <div className="bg-yellow-500 text-black p-4 flex items-center">
             <FaRegGem size={20} className="mr-2" />
-            <h3 className="font-semibold">AI Jewelry Consultant</h3>
+            <h3 className="font-semibold">Jeify Jewelry Consultant</h3>
           </div>
           
           {/* Messages area */}
