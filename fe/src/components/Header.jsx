@@ -11,7 +11,7 @@ import {
 	CiShoppingCart,
 	CiUser,
 } from 'react-icons/ci'
-import { Search, ShoppingCart } from 'lucide-react'
+import { Search, ShoppingCart, MessageCircle } from 'lucide-react'
 import { AuthProvider, UserPublicInfoProvider } from './provider/provider'
 
 const UserItem = [
@@ -23,6 +23,16 @@ const Header = () => {
 	const [open, setOpen] = useState(false)
 	const { isAuth, SetIsAuth } = useContext(AuthProvider)
 	const userName = localStorage.getItem('userName')
+
+	// Function to open chat
+	const openChat = () => {
+		// Create and dispatch a custom event to trigger chat opening
+		const chatEvent = new CustomEvent('openJeifyChat', { 
+			detail: { source: 'header' } 
+		});
+		document.dispatchEvent(chatEvent);
+	}
+
 	return (
 		<nav className="bg-primary text-black ">
 			<div className="container mx-auto flex justify-between items-center">
@@ -88,14 +98,12 @@ const Header = () => {
 												>
 													Yêu Thích
 												</Link>
-												<a
-													href="https://jeifypro.netlify.app/"
-													target="_blank"
-													rel="noopener noreferrer"
-													className="hover:border-[1px] hover:shadow-sm px-4 py-2 hover:bg-primary hover:rounded-lg border-b-2"
+												<button
+													onClick={openChat}
+													className="text-left hover:border-[1px] hover:shadow-sm px-4 py-2 hover:bg-primary hover:rounded-lg border-b-2"
 												>
 													Chat
-												</a>
+												</button>
 												<Link
 													to={'/'}
 													className="hover:border-[1px] hover:shadow-sm px-4 py-2 hover:bg-primary hover:rounded-lg border-b-2"
@@ -120,14 +128,13 @@ const Header = () => {
 							>
 								Log in
 							</Link>
-							<a
-								href="https://jeifypro.netlify.app/"
-								target="_blank"
-								rel="noopener noreferrer"
-								className="bg-white text-primary font-bold text-lg py-2 px-4 rounded"
+							<button
+								onClick={openChat}
+								className="bg-white text-primary font-bold text-lg py-2 px-4 rounded flex items-center gap-2"
 							>
+								<MessageCircle size={18} />
 								Chat
-							</a>
+							</button>
 						</li>
 					)}
 				</ul>
