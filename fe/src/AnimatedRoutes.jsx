@@ -19,6 +19,7 @@ import ProductList from './routes/ListProduct/ProductList'
 import OrderDashboard from './routes/admin/OrderDasboard'
 import EmployeeDashboard from './routes/admin/EmployeeDasboard'
 import Cart from './routes/cart/Cart'
+import Checkout from './routes/Checkout'
 
 // Import transitions
 
@@ -47,6 +48,7 @@ export default function AnimatedRoutes() {
 				<Route path="order" element={<OrderDashboard />} />
 				<Route path="employee" element={<EmployeeDashboard />} />
 			</Route>
+			<Route path="/checkout" element={<Checkout />} />
 
 			{/* <Route path="/about" element={<About />} /> */}
 			{/* <Route path="/contact" element={<Contact />} /> */}
