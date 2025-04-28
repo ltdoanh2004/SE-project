@@ -5,7 +5,7 @@ export default function Banner() {
 	return (
 		<Transition className="flex items-center flex-col">
 			<div
-				className="bg-center h-[80vh] w-[100vw] flex justify-center items-center bg-cover bg-no-repeat"
+				className="bg-center h-[80vh] w-[99vw] flex justify-center items-center bg-cover bg-no-repeat"
 				style={{ backgroundImage: `url(${bannerImage})` }}
 			>
 				{/* <div className="container mx-auto px-4">
