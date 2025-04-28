@@ -5,6 +5,7 @@ import productRoutes from "./product.js";
 import customerRoutes from "./customer.js";
 import orderRoutes from "./order.js";
 import paymentsRoutes from "./payments.js";
+import chatbotRoutes from "./chatbot.js";
 
 const router = express.Router();
 
@@ -19,5 +20,7 @@ router.use("/customer",customerRoutes);
 router.use("/order", orderRoutes);
 
 router.use("/payments", paymentsRoutes);
+
+router.use("/chatbot", chatbotRoutes);
 
 export default router;

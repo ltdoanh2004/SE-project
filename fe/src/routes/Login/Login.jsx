@@ -20,6 +20,7 @@ export default function LoginPage() {
 	const errorMessage = useSelector((state) => state.user.errorMessage) // Access error message from Redux state
 
 	const onSubmit = async (data) => {
+		console.log(data)
 		try {
 			UserAuthenticationService.login(data).then(async (res) => {
 				console.log(res)
