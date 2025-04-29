@@ -13,6 +13,7 @@ const Cart = () => {
 	const [selectAll, setSelectAll] = useState(false)
 
 	const cartItems = useSelector((state) => state.cart.items)
+	console.log(cartItems)
 		const dispatch = useDispatch()
 		const navigate = useNavigate()
 
@@ -142,7 +143,7 @@ const Cart = () => {
 										<td className="border-b border-gray-500 py-4">
 											<div className="flex items-center gap-x-3">
 												<img
-													src={item.image}
+													src={`http://localhost:8000${item.image[0]}`}
 													alt={item.name}
 													className="w-40 h-40 object-cover rounded-md"
 												/>
@@ -237,7 +238,12 @@ const Cart = () => {
 					</div>
 
 					<div className="text-center mt-4 hover:cursor-pointer">
-						<button onClick={(e) => {e.preventDefault(); setIsCheckoutOpen(true)}}>
+						<button
+							onClick={(e) => {
+								e.preventDefault()
+								setIsCheckoutOpen(true)
+							}}
+						>
 							<p className="bg-primary hover:bg-secondary font-semibold px-12 text-center py-3 rounded-xl inline-block">
 								Thanh toán <ArrowRight className="inline-block mb-[1px] ml-1" />
 							</p>
@@ -280,7 +286,10 @@ const Cart = () => {
 						</div>
 						<button
 							className="mt-6 w-full bg-gray-800 text-white py-3 rounded-lg hover:bg-gray-700"
-							onClick={(e)=> {e.preventDefault(); handleGoToCheckout()}}
+							onClick={(e) => {
+								e.preventDefault()
+								handleGoToCheckout()
+							}}
 						>
 							Proceed to Checkout
 						</button>
