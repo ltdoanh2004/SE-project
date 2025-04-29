@@ -166,6 +166,7 @@ const ProductList = () => {
 	}
 
 	const handleAddToCart = (product) => {
+		console.log(product)
 		dispatch(addToCart(product))
 		navigate('/cart')
 	}

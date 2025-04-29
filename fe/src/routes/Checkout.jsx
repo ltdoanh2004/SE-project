@@ -36,7 +36,7 @@ const Checkout = () => {
 				</div>
 				<div className="mb-5 text-gray-400">
 					<Link to="/" className="hover:underline text-gray-500">
-						Home    
+						Home
 					</Link>{' '}
 					/
 					<Link to="/cart" className="hover:underline text-gray-500 ml-1">
@@ -59,7 +59,7 @@ const Checkout = () => {
 							>
 								<div className="w-16 h-16 bg-gray-50 border border-gray-200 overflow-hidden rounded-lg">
 									<img
-										src={item.image}
+										src={`http://localhost:8000${item.image[0]}`}
 										alt={item.name}
 										className="object-cover w-full h-full"
 									/>
