@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useState } from 'react'
 import { Checkbox, Collapse, Slider, Button, Card } from 'antd'
 import './ProductList.css'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -6,83 +6,84 @@ import { addToCart } from '../../redux/actions/cartActions' // Đường dẫn �
 import { filter } from 'framer-motion/client'
 import { use } from 'react'
 import { useDispatch } from 'react-redux'
+import { ProductService } from '../../services/prod/productService'
 
 const { Panel } = Collapse
 
-const products = [
-	{
-		id: 1,
-		name: 'Nhẫn Vàng',
-		brand: 'Daniel Wellington',
-		collection: 'Trang Sức Đính Kim Cương',
-		material: 'Vàng',
-		price: 5000000,
-		image:
-			'https://cdn.pnj.io/images/detailed/237/sp-gnxm00y005207-nhan-vang-dinh-da-ecz-pnj-1.png',
-		hoverImage:
-			'https://cdn.pnj.io/images/detailed/237/sp-gnxm00y005207-nhan-vang-dinh-da-ecz-pnj-2.png',
-	},
-	{
-		id: 2,
-		name: 'Dây Chuyền Bạc',
-		brand: 'Calvin Klein',
-		collection: 'Trang Sức Đính ECZ',
-		material: 'Bạc',
-		price: 2000000,
-		image:
-			'https://cdn.pnj.io/images/detailed/212/sp-smxmxmw060063-mat-day-chuyen-bac-dinh-da-pnjsilver-1.png',
-		hoverImage:
-			'https://cdn.pnj.io/images/detailed/212/sp-smxmxmw060063-mat-day-chuyen-bac-dinh-da-pnjsilver-2.png',
-	},
-	{
-		id: 3,
-		name: 'Bông Tai Platinum',
-		brand: 'Michael Kors',
-		collection: 'Trang Sức Công Nghệ Ý',
-		material: 'Platinum',
-		price: 8000000,
-		image:
-			'https://cdn.pnj.io/images/detailed/203/sp-sb0000w000120-bong-tai-bac-style-by-pnj-love-potion-1.png',
-		hoverImage:
-			'https://cdn.pnj.io/images/detailed/203/sp-sb0000w000120-bong-tai-bac-style-by-pnj-love-potion-2.png',
-	},
-	{
-		id: 4,
-		name: 'Nhẫn Vàng',
-		brand: 'Daniel Wellington',
-		collection: 'Trang Sức Đính Kim Cương',
-		material: 'Vàng',
-		price: 5000000,
-		image:
-			'https://cdn.pnj.io/images/detailed/237/sp-gnxm00y005207-nhan-vang-dinh-da-ecz-pnj-1.png',
-		hoverImage:
-			'https://cdn.pnj.io/images/detailed/237/sp-gnxm00y005207-nhan-vang-dinh-da-ecz-pnj-2.png',
-	},
-	{
-		id: 5,
-		name: 'Dây Chuyền Bạc',
-		brand: 'Calvin Klein',
-		collection: 'Trang Sức Đính ECZ',
-		material: 'Bạc',
-		price: 2000000,
-		image:
-			'https://cdn.pnj.io/images/detailed/212/sp-smxmxmw060063-mat-day-chuyen-bac-dinh-da-pnjsilver-1.png',
-		hoverImage:
-			'https://cdn.pnj.io/images/detailed/212/sp-smxmxmw060063-mat-day-chuyen-bac-dinh-da-pnjsilver-2.png',
-	},
-	{
-		id: 6,
-		name: 'Bông Tai Platinum',
-		brand: 'Michael Kors',
-		collection: 'Trang Sức Công Nghệ Ý',
-		material: 'Platinum',
-		price: 8000000,
-		image:
-			'https://cdn.pnj.io/images/detailed/203/sp-sb0000w000120-bong-tai-bac-style-by-pnj-love-potion-1.png',
-		hoverImage:
-			'https://cdn.pnj.io/images/detailed/203/sp-sb0000w000120-bong-tai-bac-style-by-pnj-love-potion-2.png',
-	},
-]
+// const products = [
+// 	{
+// 		id: 1,
+// 		name: 'Nhẫn Vàng',
+// 		brand: 'Daniel Wellington',
+// 		collection: 'Trang Sức Đính Kim Cương',
+// 		material: 'Vàng',
+// 		price: 5000000,
+// 		image:
+// 			'https://cdn.pnj.io/images/detailed/237/sp-gnxm00y005207-nhan-vang-dinh-da-ecz-pnj-1.png',
+// 		hoverImage:
+// 			'https://cdn.pnj.io/images/detailed/237/sp-gnxm00y005207-nhan-vang-dinh-da-ecz-pnj-2.png',
+// 	},
+// 	{
+// 		id: 2,
+// 		name: 'Dây Chuyền Bạc',
+// 		brand: 'Calvin Klein',
+// 		collection: 'Trang Sức Đính ECZ',
+// 		material: 'Bạc',
+// 		price: 2000000,
+// 		image:
+// 			'https://cdn.pnj.io/images/detailed/212/sp-smxmxmw060063-mat-day-chuyen-bac-dinh-da-pnjsilver-1.png',
+// 		hoverImage:
+// 			'https://cdn.pnj.io/images/detailed/212/sp-smxmxmw060063-mat-day-chuyen-bac-dinh-da-pnjsilver-2.png',
+// 	},
+// 	{
+// 		id: 3,
+// 		name: 'Bông Tai Platinum',
+// 		brand: 'Michael Kors',
+// 		collection: 'Trang Sức Công Nghệ Ý',
+// 		material: 'Platinum',
+// 		price: 8000000,
+// 		image:
+// 			'https://cdn.pnj.io/images/detailed/203/sp-sb0000w000120-bong-tai-bac-style-by-pnj-love-potion-1.png',
+// 		hoverImage:
+// 			'https://cdn.pnj.io/images/detailed/203/sp-sb0000w000120-bong-tai-bac-style-by-pnj-love-potion-2.png',
+// 	},
+// 	{
+// 		id: 4,
+// 		name: 'Nhẫn Vàng',
+// 		brand: 'Daniel Wellington',
+// 		collection: 'Trang Sức Đính Kim Cương',
+// 		material: 'Vàng',
+// 		price: 5000000,
+// 		image:
+// 			'https://cdn.pnj.io/images/detailed/237/sp-gnxm00y005207-nhan-vang-dinh-da-ecz-pnj-1.png',
+// 		hoverImage:
+// 			'https://cdn.pnj.io/images/detailed/237/sp-gnxm00y005207-nhan-vang-dinh-da-ecz-pnj-2.png',
+// 	},
+// 	{
+// 		id: 5,
+// 		name: 'Dây Chuyền Bạc',
+// 		brand: 'Calvin Klein',
+// 		collection: 'Trang Sức Đính ECZ',
+// 		material: 'Bạc',
+// 		price: 2000000,
+// 		image:
+// 			'https://cdn.pnj.io/images/detailed/212/sp-smxmxmw060063-mat-day-chuyen-bac-dinh-da-pnjsilver-1.png',
+// 		hoverImage:
+// 			'https://cdn.pnj.io/images/detailed/212/sp-smxmxmw060063-mat-day-chuyen-bac-dinh-da-pnjsilver-2.png',
+// 	},
+// 	{
+// 		id: 6,
+// 		name: 'Bông Tai Platinum',
+// 		brand: 'Michael Kors',
+// 		collection: 'Trang Sức Công Nghệ Ý',
+// 		material: 'Platinum',
+// 		price: 8000000,
+// 		image:
+// 			'https://cdn.pnj.io/images/detailed/203/sp-sb0000w000120-bong-tai-bac-style-by-pnj-love-potion-1.png',
+// 		hoverImage:
+// 			'https://cdn.pnj.io/images/detailed/203/sp-sb0000w000120-bong-tai-bac-style-by-pnj-love-potion-2.png',
+// 	},
+// ]
 
 const ProductList = () => {
 	const dispatch = useDispatch()
@@ -96,9 +97,27 @@ const ProductList = () => {
 	}
 
 	const [filters, setFilters] = useState(defaultFilters)
+	const [products, setProducts] = useState([])
 	const [filteredProducts, setFilteredProducts] = useState(products)
 	const [activePanels, setActivePanels] = useState([]) // Mặc định tất cả đóng
 	const [currentImage, setCurrentImage] = useState([])
+
+	useLayoutEffect(() => {
+		(async () => {
+			await ProductService.getAllProductList()
+				.then((res) => {
+					console.log(res)
+					setProducts(res.products)
+					setFilteredProducts(res.products)
+					setCurrentImage(
+						res.products.map((product) => `http://localhost:8000${product.image[0]}`),
+					)
+				})
+				.catch((err) => {
+					console.error(err)
+				})
+		})()
+	}, [])
 
 	const handleCheckboxChange = (category, value) => {
 		setFilters((prev) => {
@@ -268,13 +287,13 @@ const ProductList = () => {
 							onMouseEnter={() =>
 								setCurrentImage((prev) => ({
 									...prev,
-									[index]: product.hoverImage,
+									[index]: `http://localhost:8000${product.image[1]}`,
 								}))
 							}
 							onMouseLeave={() =>
 								setCurrentImage((prev) => ({
 									...prev,
-									[index]: product.image,
+									[index]: `http://localhost:8000${product.image[0]}`,
 								}))
 							}
 						>
@@ -291,7 +310,7 @@ const ProductList = () => {
 									margin: '10px 0',
 								}}
 							>
-								{product.price.toLocaleString()} VND
+								{new Number(product.price).toLocaleString()} VND
 							</p>
 							<Button
 								className="bg-primary hover:!bg-secondary text-black"
