@@ -1,1 +1,1 @@
-export { default } from './Chatbot'; 
+export { default } from './ChatbotOpenAI'; 
