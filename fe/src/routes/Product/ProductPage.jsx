@@ -4,7 +4,6 @@ import axios from 'axios';
 import { use } from 'react';
 import { useDispatch } from 'react-redux';
 import { addToCart } from '../../redux/actions/cartActions';
-import Checkout from '../Checkout';
 
 const ProductPage = () => {
   const [product, setProduct] = useState(null);
@@ -54,10 +53,6 @@ const ProductPage = () => {
       dispatch(addToCart({ id, image, name, price }))
     }
     navigate('/cart')
-  }
-
-  const handlePurchase = (item) => {
-    navigate('/checkout', { state: { item, quantity } })
   }
 
   return (
@@ -130,7 +125,6 @@ const ProductPage = () => {
 								backgroundColor: 'rgba(242, 219, 169, 1)',
 								color: '#000',
 							}}
-              onClick={() => handlePurchase(product)}
 						>
 							Mua ngay
 						</button>

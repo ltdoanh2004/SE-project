@@ -103,16 +103,14 @@ const ProductList = () => {
 	const [currentImage, setCurrentImage] = useState([])
 
 	useLayoutEffect(() => {
-		;(async () => {
+		(async () => {
 			await ProductService.getAllProductList()
 				.then((res) => {
 					console.log(res)
 					setProducts(res.products)
 					setFilteredProducts(res.products)
 					setCurrentImage(
-						res.products.map(
-							(product) => `http://localhost:8000${product.image[0]}`,
-						),
+						res.products.map((product) => `http://localhost:8000${product.image[0]}`),
 					)
 				})
 				.catch((err) => {
@@ -141,68 +139,31 @@ const ProductList = () => {
 	}, [routeFilter.pathname])
 	console.log(filters)
 
-	useEffect(() => {}, [])
+	useEffect(() => {
+		setCurrentImage(products.map((product) => product.image))
+	}, [])
 
 	const handleSliderChange = (value) => {
 		setFilters((prev) => ({ ...prev, price: value }))
 	}
 
 	const applyFilters = () => {
-		console.log('Filters:', filters)
-		new Promise((resolve, reject) => {
-			if (products.length === 0) {
-				reject('No products found')
-			}
-			return resolve(
-				products.filter(
-					(product) =>
-						filters.type.length === 0 ||
-						filters.type.includes(product.name.split(' ')[0] &&
+		setFilteredProducts(
+			products.filter(
+				(product) =>
+					(filters.type.length === 0 ||
+						filters.type.includes(product.name.split(' ')[0])) &&
 					(filters.brand.length === 0 ||
-						filters.brand.includes(product.brand)))
-					// (filters.collection.length === 0 ||
-					// 	filters.collection.includes(product.collection)) &&
-					// (filters.material.length === 0 ||
-					// 	filters.material.includes(product.material)) &&
-					// product.price >= filters.price[0] &&
-					// product.price <= filters.price[1],
-				),
-			)
-		})
-			.then((res) => {
-				console.log('Filtered products:', res)
-				setFilteredProducts(res)
-				setCurrentImage(
-					res.map((prod) => `http://localhost:8000${prod.image[0]}`),
-				)
-			})
-			.catch((err) => {
-				console.error(err)
-			})
+						filters.brand.includes(product.brand)) &&
+					(filters.collection.length === 0 ||
+						filters.collection.includes(product.collection)) &&
+					(filters.material.length === 0 ||
+						filters.material.includes(product.material)) &&
+					product.price >= filters.price[0] &&
+					product.price <= filters.price[1],
+			),
+		)
 	}
-	// 	setFilteredProducts(
-	// 		products.filter(
-	// 			(product) =>
-	// 				filters.type.length === 0 ||
-	// 				filters.type.includes(product.name.split(' ')[0]),
-	// 			// (filters.brand.length === 0 ||
-	// 			// 	filters.brand.includes(product.brand)) &&
-	// 			// (filters.collection.length === 0 ||
-	// 			// 	filters.collection.includes(product.collection)) &&
-	// 			// (filters.material.length === 0 ||
-	// 			// 	filters.material.includes(product.material)) &&
-	// 			// product.price >= filters.price[0] &&
-	// 			// product.price <= filters.price[1],
-	// 		),
-	// 	)
-	// 	setCurrentImage(
-	// 		filteredProducts.map(
-	// 			(product) => `http://localhost:8000${product.image[0]}`,
-	// 		),
-	// 	)
-	// 	console.log('Current images:', currentImage)
-	// 	console.log('Filtered products:', filteredProducts)
-	// }
 
 	const handleAddToCart = (product) => {
 		console.log(product)
@@ -225,16 +186,10 @@ const ProductList = () => {
 			<div className="filter-sidebar max-md:w-[300px] max-xl:w-[300px] max-sm:w-[150px]">
 				<Collapse activeKey={activePanels} onChange={setActivePanels}>
 					<Panel header="Loại" key="1">
-						{['Nhẫn', 'Dây', 'Bông', 'Lắc'].map((item) => (
+						{['Nhẫn', 'Dây chuyền', 'Bông tai', 'Lắc Vòng'].map((item) => (
 							<div key={item}>
 								<Checkbox onChange={() => handleCheckboxChange('type', item)}>
-									{item === 'Dây'
-										? 'Dây Chuyền'
-										: item === 'Bông'
-										? 'Bông tai'
-										: item === 'Lắc'
-										? 'Lắc tay'
-										: 'Nhẫn'}
+									{item}
 								</Checkbox>
 							</div>
 						))}

@@ -13,6 +13,7 @@ const Cart = () => {
 	const [selectAll, setSelectAll] = useState(false)
 
 	const cartItems = useSelector((state) => state.cart.items)
+	console.log(cartItems)
 		const dispatch = useDispatch()
 		const navigate = useNavigate()
 
