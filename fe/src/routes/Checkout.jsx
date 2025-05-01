@@ -1,15 +1,18 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { AuthProvider } from '../components/provider/provider'
+import { OrderService } from '../services/order/OrderService'
 
 const Checkout = () => {
 	const cartItems = useSelector((state) => state.cart.items)
+	console.log(cartItems)
 
 	// State cho contact info
 	const [contactName, setContactName] = useState('')
 	const [contactNumber, setContactNumber] = useState('')
 	const [billingAddress, setBillingAddress] = useState('')
+	const [paymentMethod, setPaymentMethod] = useState('momo')
 
 	const subtotal = cartItems.reduce(
 		(total, item) => total + item.price * (item.quantity || 1),
@@ -20,6 +23,34 @@ const Checkout = () => {
 	const { isAuth } = useContext(AuthProvider)
 	const navigate = useNavigate()
 
+	const handlePayNowClick = async () => {
+		await new Promise(async (resolve, reject) => {
+			const orderPayload = {
+				items: cartItems.map((item) => ({
+					productId: item.id,
+					quantity: item.quantity,
+				})),
+				paytype: paymentMethod,
+			}
+			await OrderService.creatOrder(orderPayload).then(async (res) => {
+				const orderID = res.orderID
+				if (paymentMethod === 'zalopay') {
+					await OrderService.payByZalo(orderID).then((res) => {
+						const payUrl = res.order_url
+						window.open(payUrl, '_blank')
+						resolve()
+					})
+				}
+				if (paymentMethod === 'momo') {
+					await OrderService.payByMomo(orderID).then((res) => {
+						const payUrl = res.paymentUrl
+						window.open(payUrl, '_blank')
+						resolve()
+					})
+				}
+			})
+		})
+	}
 	if (!isAuth) {
 		return (
 			<div className="min-w-screen min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -153,7 +184,7 @@ const Checkout = () => {
 								</div>
 								<div>
 									<span className="font-semibold text-gray-600 text-xl">
-										{item.price.toLocaleString()} VND
+										{Number(item.price).toLocaleString()} VND
 									</span>
 								</div>
 							</div>
@@ -244,44 +275,71 @@ const Checkout = () => {
 						</div>
 
 						{/* Payment Options */}
-						<div className="border border-gray-200 rounded-lg bg-white p-3 mb-6">
-							{/* Visa */}
-							<div className="border-b border-gray-200 pb-3 mb-3">
+						<div className="border border-gray-200 rounded-lg bg-white p-5 mb-6">
+							<h3 className="text-lg font-semibold text-gray-700 mb-4">
+								Payment Method
+							</h3>
+
+							{/* Momo */}
+							<div className="border-b border-gray-200 pb-4 mb-4">
 								<label className="flex items-center cursor-pointer">
 									<input
 										type="radio"
 										name="payment"
-										defaultChecked
-										className="form-radio h-5 w-5 text-indigo-500"
+										value="momo"
+										checked={paymentMethod === 'momo'}
+										onChange={() => setPaymentMethod('momo')}
+										className="form-radio h-5 w-5 text-pink-500"
 									/>
-									<img
-										src="https://leadershipmemphis.org/wp-content/uploads/2020/08/780370.png"
-										className="h-6 ml-3"
-										alt="Card Logos"
-									/>
+									<div className="ml-3 flex items-center">
+										<img
+											src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png"
+											className="h-8 mr-2"
+											alt="Momo"
+										/>
+										<span className="font-medium text-gray-700">Momo</span>
+									</div>
 								</label>
+								{paymentMethod === 'momo' && (
+									<div className="mt-3 ml-8 text-sm text-gray-600">
+										<p>Link your Momo wallet to pay quickly and securely</p>
+									</div>
+								)}
 							</div>
 
-							{/* PayPal */}
+							{/* ZaloPay */}
 							<div>
 								<label className="flex items-center cursor-pointer">
 									<input
 										type="radio"
 										name="payment"
-										className="form-radio h-5 w-5 text-indigo-500"
+										value="zalopay"
+										checked={paymentMethod === 'zalopay'}
+										onChange={() => setPaymentMethod('zalopay')}
+										className="form-radio h-5 w-5 text-blue-500"
 									/>
-									<img
-										src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg"
-										width="80"
-										className="ml-3"
-										alt="PayPal"
-									/>
+									<div className="ml-3 flex items-center">
+										<img
+											src="https://img.icons8.com/color/48/000000/zalo.png"
+											className="h-8 w-8 mr-2 object-contain"
+											alt="ZaloPay"
+										/>
+										<span className="font-medium text-gray-700">ZaloPay</span>
+									</div>
 								</label>
+								{paymentMethod === 'zalopay' && (
+									<div className="mt-3 ml-8 text-sm text-gray-600">
+										<p>Pay securely using your ZaloPay account</p>
+									</div>
+								)}
 							</div>
 						</div>
 
 						{/* Pay Now Button */}
-						<button className="w-full bg-indigo-500 hover:bg-indigo-700 text-white rounded-lg px-3 py-3 font-semibold">
+						<button
+							onClick={handlePayNowClick}
+							className="w-full bg-indigo-500 hover:bg-indigo-700 text-white rounded-lg px-3 py-3 font-semibold"
+						>
 							<i className="mdi mdi-lock-outline mr-1"></i> PAY NOW
 						</button>
 					</div>

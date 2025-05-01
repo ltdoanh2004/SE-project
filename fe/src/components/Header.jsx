@@ -93,7 +93,7 @@ const Header = () => {
 													Tài Khoản
 												</Link>
 												<Link
-													to={'/'}
+													to={'/orders'}
 													className="hover:border-[1px] hover:shadow-sm px-4 py-2 hover:bg-primary hover:rounded-lg border-b-2"
 												>
 													Đơn Hàng
@@ -111,8 +111,8 @@ const Header = () => {
 													Chat
 												</button>
 												<button
-												onClick={(e) => {
-													e.preventDefault()
+													onClick={(e) => {
+														e.preventDefault()
 														handleLogOut()
 													}}
 													className="hover:border-[1px] text-left hover:shadow-sm px-4 py-2 hover:bg-primary hover:rounded-lg border-b-2"

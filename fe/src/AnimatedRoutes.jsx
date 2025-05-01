@@ -20,6 +20,8 @@ import OrderDashboard from './routes/admin/OrderDasboard'
 import EmployeeDashboard from './routes/admin/EmployeeDasboard'
 import Cart from './routes/cart/Cart'
 import Checkout from './routes/Checkout'
+import OrderList from './routes/Order/OrderList'
+import OrderDetail from './routes/Order/OrderDetail'
 
 // Import transitions
 
@@ -49,6 +51,8 @@ export default function AnimatedRoutes() {
 				<Route path="employee" element={<EmployeeDashboard />} />
 			</Route>
 			<Route path="/checkout" element={<Checkout />} />
+			<Route path="/orders" element={<OrderList />} />
+			<Route path="/orders/:orderId" element={<OrderDetail />} />
 
 			{/* <Route path="/about" element={<About />} /> */}
 			{/* <Route path="/contact" element={<Contact />} /> */}
