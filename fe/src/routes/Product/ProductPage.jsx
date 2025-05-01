@@ -55,6 +55,14 @@ const ProductPage = () => {
     navigate('/cart')
   }
 
+  const handleBuyNow = () => {
+	const {id, image, name, price} = product
+	for(let i = 1; i <=quantity; i++){
+	  dispatch(addToCart({ id, image, name, price }))
+	}
+	navigate('/checkout', { state: { product } })
+  }
+
   return (
 		<div className="w-full max-w-screen-xl mx-auto p-6 min-h-screen">
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -125,6 +133,7 @@ const ProductPage = () => {
 								backgroundColor: 'rgba(242, 219, 169, 1)',
 								color: '#000',
 							}}
+							onClick={handleAddToCart}
 						>
 							Mua ngay
 						</button>
