@@ -1,3 +1,4 @@
+import { body } from 'framer-motion/client'
 import request from '../../utils/request.js'
 
 export class ProductService {
@@ -11,11 +12,11 @@ export class ProductService {
 			},
 		})
 	}
-	static signUp = (data) => {
+	static getFilteredProductList = (data) => {
 		return request({
-			url: 'users/register',
+			url: 'product/get-Jewelry',
 			method: 'post',
-			Headers: {
+			headers: {
 				'Content-Type': 'application/json',
 				Accept: 'application/json',
 			},

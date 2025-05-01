@@ -157,7 +157,8 @@ const cleanupUploadedFiles = (files) => {
 // Lấy sản phẩm theo các điều kiện lọc
 export const getByJewelry = async (req, res) => {
     try {
-        const { jewelryFit, jewelry, page } = req.query; // Lấy từ req.query thay vì req.body
+        const { jewelryFit, jewelry, page } = req.body; // Lấy từ req.query thay vì req.body
+        console.log("Received request body:", req.body);
 
         // Lấy thông tin phân trang
         const pageNumber = parseInt(page?.number) || 1; 
@@ -168,6 +169,7 @@ export const getByJewelry = async (req, res) => {
         const whereClause = {};
 
         if (jewelryFit) whereClause.jewelryFit = jewelryFit;
+        console.log("Where clause:", whereClause);
 
         if (jewelry) {
         if (jewelry.type) whereClause.jewelryType = jewelry.type;
