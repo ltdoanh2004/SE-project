@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import React, { useContext, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
+import { AuthProvider } from '../components/provider/provider'
 
 const Checkout = () => {
 	const cartItems = useSelector((state) => state.cart.items)
@@ -16,6 +17,86 @@ const Checkout = () => {
 	)
 	const taxes = subtotal * 0.1
 	const total = subtotal + taxes
+	const { isAuth } = useContext(AuthProvider)
+	const navigate = useNavigate()
+
+	if (!isAuth) {
+		return (
+			<div className="min-w-screen min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+				<div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-md">
+					<div>
+						<h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+							Sign in required
+						</h2>
+						<p className="mt-2 text-center text-sm text-gray-600">
+							Please sign in to complete your checkout
+						</p>
+					</div>
+
+					<div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+						<div className="flex">
+							<div className="flex-shrink-0">
+								<svg
+									className="h-5 w-5 text-yellow-400"
+									xmlns="http://www.w3.org/2000/svg"
+									viewBox="0 0 20 20"
+									fill="currentColor"
+								>
+									<path
+										fillRule="evenodd"
+										d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+										clipRule="evenodd"
+									/>
+								</svg>
+							</div>
+							<div className="ml-3">
+								<p className="text-sm text-yellow-700">
+									You need to be signed in to complete your purchase.
+								</p>
+							</div>
+						</div>
+					</div>
+
+					<div className="flex flex-col space-y-4">
+						<button
+							onClick={() => navigate('/login')}
+							className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none"
+						>
+							Sign in
+						</button>
+
+						<button
+							onClick={() => navigate('/register')}
+							className="group relative w-full flex justify-center py-3 px-4 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
+						>
+							Create an account
+						</button>
+
+						<Link
+							to="/cart"
+							className="inline-flex items-center justify-center text-sm text-indigo-600 hover:text-indigo-500 mt-4"
+						>
+							<svg
+								className="w-4 h-4 mr-2"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									strokeLinecap="round"
+									strokeLinejoin="round"
+									strokeWidth={2}
+									d="M10 19l-7-7m0 0l7-7m-7 7h18"
+								/>
+							</svg>
+							Return to cart
+						</Link>
+					</div>
+				</div>
+			</div>
+		)
+	}
 
 	return (
 		<div className="min-w-screen min-h-screen bg-gray-50 py-5">
