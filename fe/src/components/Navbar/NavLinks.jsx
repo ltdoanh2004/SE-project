@@ -65,8 +65,8 @@ const NavLinks = () => {
 						`}
 					>
 						{/* sublinks */}
-						{link.sublinks.map((slinks) => (
-							<div key={slinks.link}>
+						{link.sublinks.map((slinks, index) => (
+							<div key={index}>
 								<div className="flex items-center">
 									<h1
 										onClick={() =>
@@ -74,7 +74,7 @@ const NavLinks = () => {
 												? setSubHeading(slinks.Head)
 												: setSubHeading('')
 										}
-										className="py-4 pl-7 font-semibold md:pr-0 pr-5 flex justify-between items-center md:pr-0 pr-5"
+										className="py-4 pl-7 font-semibold flex justify-between items-center md:pr-0 pr-5"
 									>
 										{slinks.Head}
 										<span className="md:mt-1 md:ml-2 inline mx-2 text-sm">
