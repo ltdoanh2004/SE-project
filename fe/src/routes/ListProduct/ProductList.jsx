@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useState } from 'react'
 import { Checkbox, Collapse, Slider, Button, Card, Radio } from 'antd'
 import './ProductList.css'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { addToCart } from '../../redux/actions/cartActions'
 import { useDispatch } from 'react-redux'
 import { ProductService } from '../../services/prod/productService'
@@ -36,6 +36,7 @@ const ProductList = () => {
 	const [activePanels, setActivePanels] = useState([])
 	const [currentImage, setCurrentImage] = useState([])
 	const [loading, setLoading] = useState(true)
+	const routeFilter = useParams()
 
 	const applyFilters = async () => {
 		setLoading(true)
@@ -57,70 +58,69 @@ const ProductList = () => {
 		}
 	}
 
-	const routeFilter = useLocation()
 	useEffect(() => {
-		setFilters((prev) => ({
-			jewelryFit:
-				routeFilter.pathname.split('/')[2] === 'men'
-					? 'nam'
-					: routeFilter.pathname.split('/')[2] === 'women'
-					? 'nữ'
-					: 'trẻ em',
-			jewelry: {
-				[routeFilter.pathname.split('/')[3]]:
-					routeFilter.pathname.split('/')[4] === 'ring'
-						? 'Nhẫn'
-						: routeFilter.pathname.split('/')[4] === 'necklace'
-						? 'Dây chuyền'
-						: routeFilter.pathname.split('/')[4] === 'earring'
-						? 'Bông tai'
-						: routeFilter.pathname.split('/')[4] === 'bracelet'
-						? 'Lắc Vòng'
-						: routeFilter.pathname.split('/')[4] === 'gold'
-						? 'Vàng'
-						: routeFilter.pathname.split('/')[4] === 'silver'
-						? 'Bạc'
-						: routeFilter.pathname.split('/')[4] === 'platinum'
-						? 'Platinum'
-						: routeFilter.pathname.split('/')[4] === 'daniel_wellington'
-						? 'Daniel Wellington'
-						: routeFilter.pathname.split('/')[4] === 'calvin_klein'
-						? 'Calvin Klein'
-						: routeFilter.pathname.split('/')[4] === 'michael_kors'
-						? 'Michael Kors'
-						: routeFilter.pathname.split('/')[4] === 'fossils'
-						? 'Fossils'
-						: routeFilter.pathname.split('/')[4] === 'titan'
-						? 'Titan'
-						: routeFilter.pathname.split('/')[4] === 'diamond'
-						? 'Trang Sức Đính Kim Cương'
-						: routeFilter.pathname.split('/')[4] === 'ecz'
-						? 'Trang Sức Đính ECZ'
-						: routeFilter.pathname.split('/')[4] === 'italy'
-						? 'Trang Sức Công Nghệ Ý'
-						: routeFilter.pathname.split('/')[4] === 'cz'
-						? 'Trang Sức Đính CZ'
-						: routeFilter.pathname.split('/')[4] === 'big_diamond'
-						? 'Kim Cương Viên'
-						: routeFilter.pathname.split('/')[4],
-				price: defaultFilters.jewelry.price,
-			},
-		}))
-	}, [routeFilter.pathname])
+		;(async () => {
+			try {
+				const { fit, category, value } = routeFilter
+				setFilters((prev) => ({
+					jewelryFit: fit === 'men' ? 'nam' : fit === 'women' ? 'nữ' : 'trẻ em',
+					jewelry: {
+						[category]:
+							value === 'ring'
+								? 'Nhẫn'
+								: value === 'necklace'
+								? 'Dây chuyền'
+								: value === 'earring'
+								? 'Bông tai'
+								: value === 'bracelet'
+								? 'Lắc Vòng'
+								: value === 'gold'
+								? 'Vàng'
+								: value === 'silver'
+								? 'Bạc'
+								: value === 'platinum'
+								? 'Platinum'
+								: value === 'daniel_wellington'
+								? 'Daniel Wellington'
+								: value === 'calvin_klein'
+								? 'Calvin Klein'
+								: value === 'michael_kors'
+								? 'Michael Kors'
+								: value === 'fossils'
+								? 'Fossils'
+								: value === 'titan'
+								? 'Titan'
+								: value === 'diamond'
+								? 'Trang Sức Đính Kim Cương'
+								: value === 'ecz'
+								? 'Trang Sức Đính ECZ'
+								: value === 'italy'
+								? 'Trang Sức Công Nghệ Ý'
+								: value === 'cz'
+								? 'Trang Sức Đính CZ'
+								: value === 'big_diamond'
+								? 'Kim Cương Viên'
+								: value,
+						price: defaultFilters.jewelry.price,
+					},
+				}))
+			} catch (error) {
+				console.error('Error parsing URL:', error)
+			}
+		})()
+	}, [routeFilter])
+
 	useLayoutEffect(() => {
 		;(async () => {
-			setLoading(true)
-			console.log(filters)
 			await applyFilters()
-				.then(() => {
-					setLoading(false)
-				})
-				.catch((err) => {
-					console.error(err)
-				})
 		})()
-	}, [])
-
+	}, [
+		filters.jewelryFit,
+		filters.jewelry.type,
+		filters.jewelry.material,
+		filters.jewelry.brand,
+		filters.jewelry.collection,
+	])
 	const handleCheckboxChange = (category, value) => {
 		setFilters((prev) => {
 			const newFilters = { ...prev }

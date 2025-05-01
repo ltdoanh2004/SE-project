@@ -30,7 +30,7 @@ export default function AnimatedRoutes() {
 			<Route path="/" element={<Home />} />
 			<Route path="/jewelry">
 				<Route index element={<Jewelry />} />
-				<Route path=":sex/:filter/:query" element={<ProductList />} />
+				<Route path=":fit/:category/:value" element={<ProductList />} />
 			</Route>
 			<Route path="/login" element={<Login />} />
 			<Route path="/register" element={<Register />} />
