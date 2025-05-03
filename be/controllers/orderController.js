@@ -615,10 +615,10 @@ export const confirmReceivedOrder = async (req, res) => {
     
         // Decode token & xác minh người dùng
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const { userID, email ,roll} = decoded;
+        const { userID, email ,role} = decoded;
     
         const user = await User.findOne({ where: { userID, email } });
-        if (!user || user.role !== "customer" || user.role !== roll) {
+        if (!user || user.role !== "customer" || user.role !== role) {
             return res.status(403).json({ message: "Forbidden: Customer access required" });
         }
     
