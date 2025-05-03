@@ -1,6 +1,8 @@
 
 import img1 from '../../assets/image/img1.png'
 import { TradingDetail } from './TradingDetail'
+import CommentSection from './CommentSection';
+
 
 const product = {
 	id: 1,
@@ -15,6 +17,8 @@ export const ProductDetail = () => {
     return (
 			<div className="mt-20 mb-20">
 				<TradingDetail {...product} />
+				<CommentSection />
+
 			</div>
 		)
 }
