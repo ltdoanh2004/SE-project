@@ -291,7 +291,7 @@ const Cart = () => {
 								handleGoToCheckout()
 							}}
 						>
-							Thực hiện thanh toán
+							Thực hiện thanh toán	
 						</button>
 					</div>
 				</div>
