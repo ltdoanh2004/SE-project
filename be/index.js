@@ -5,6 +5,7 @@ import { connectToDatabase, sequelize } from "./DB/index.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import cors from "cors";
+import cronJob from './jobs/cronJob.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -20,6 +21,8 @@ app.use(express.json());
 app.use("/api", appRoute);
 app.use("/image", express.static(path.join(__dirname, "data", "images")));
 app.use("/models", express.static(path.join(__dirname, "data", "models")));
+
+// cronJob();
 
 const startServer = async () => {
   try {

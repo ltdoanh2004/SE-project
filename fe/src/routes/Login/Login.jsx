@@ -13,6 +13,7 @@ export default function LoginPage() {
 	const {
 		register,
 		handleSubmit,
+		getValues,
 		formState: { errors },
 	} = useForm()
 	const dispatch = useDispatch()
@@ -31,6 +32,22 @@ export default function LoginPage() {
 				navigate('/', )
 				window.location.reload()
 			})
+		} catch (error) {
+			console.error(error)
+		}
+	}
+
+	const handleForgotPassword = (e) => {
+		e.preventDefault() // Prevent button default behavior
+		try {
+			const email = getValues("email")
+			if (email) {
+				UserAuthenticationService.forgotPassword(email).then((res) => {
+					alert(res.message)
+				})
+			} else {
+				alert("Please enter your email address in the email field")
+			}
 		} catch (error) {
 			console.error(error)
 		}
@@ -59,15 +76,25 @@ export default function LoginPage() {
 					{errors.email && (
 						<span className="text-red-500">This field is required</span>
 					)}
-					<input
-						placeholder="Password"
-						type="password"
-						{...register('password', { required: true })}
-						className="w-full px-4 py-2 border rounded leading-tight focus:outline-none focus:border-primary"
-					/>
-					{errors.password && (
-						<span className="text-red-500">This field is required</span>
-					)}
+					<div>
+						<input
+							placeholder="Password"
+							type="password"
+							{...register('password', { required: true })}
+							className="w-full px-4 py-2 border rounded leading-tight focus:outline-none focus:border-primary"
+						/>
+						{errors.password && (
+							<span className="text-red-500">This field is required</span>
+						)}
+						<div className="text-right">
+							<button
+								onClick={handleForgotPassword}
+								className="text-sm text-primary hover:underline"
+							>
+								Forgot password?
+							</button>
+						</div>
+					</div>
 					<input
 						type="submit"
 						className="w-full px-4 py-2 font-bold text-white hover:cursor-pointer hover:bg-secondary bg-primary rounded hover:bg-primary-dark focus:outline-none focus:shadow-outline"
