@@ -1,5 +1,5 @@
 import { CookieService } from '../../utils/CookieService.js'
-import request from '../../utils/request.js'
+import request from '../../utils/request.js' 
 
 const token = CookieService.getCookie('token')
 export class OrderService {

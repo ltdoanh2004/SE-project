@@ -163,7 +163,7 @@ const ProductPage = () => {
       </div>
 
       {/* ✅ Comment Section mới thêm */}
-      <CommentSection />
+      <CommentSection productId = {product.id} />
     </div>
   );
 };

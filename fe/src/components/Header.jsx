@@ -1,7 +1,7 @@
 import { useContext, useState } from 'react'
 import Logo from '../assets/logo.png'
 import NavLinks from '../components/Navbar/NavLinks'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import avatar from '../assets/image/banner2.png'
 import { Drawer } from 'vaul'
 
@@ -24,6 +24,7 @@ const Header = () => {
 	const [open, setOpen] = useState(false)
 	const { isAuth, SetIsAuth } = useContext(AuthProvider)
 	const userName = localStorage.getItem('userName')
+	const navigate = useNavigate()
 	const handleLogOut = () => {
 		CookieService.removeCookie('token')
 		localStorage.removeItem('userName')
@@ -109,6 +110,7 @@ const Header = () => {
 													onClick={(e) => {
 														e.preventDefault()
 														handleLogOut()
+														navigate('/')
 													}}
 													className="hover:border-[1px] text-left hover:shadow-sm px-4 py-2 hover:bg-primary hover:rounded-lg border-b-2"
 												>
