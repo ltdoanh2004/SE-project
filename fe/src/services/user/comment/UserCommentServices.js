@@ -3,7 +3,7 @@ import { CookieService } from "../../../utils/CookieService"
 
 const token = CookieService.getCookie("token")
 export class UserCommentService {
-	static postComment = (productId, { content, stars }) => {
+	static postComment = (productId, { comment, star }) => {
 		return request({
 			url: `customer/${productId}/reviews`,
 			method: 'post',
@@ -12,7 +12,7 @@ export class UserCommentService {
 				Accept: 'application/json',
 				Authorization: `Bearer ${token}`,
 			},
-			data: { content, stars },
+			data: { content: comment, stars: star },
 		})
 	}
 	static getComments = (productId) => {

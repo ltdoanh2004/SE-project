@@ -13,7 +13,7 @@ import {
 } from 'react-icons/ci'
 import { Search, ShoppingCart, MessageCircle } from 'lucide-react'
 import { AuthProvider, UserPublicInfoProvider } from './provider/provider'
-import {CookieService} from '../utils/CookieService'
+import { CookieService } from '../utils/CookieService'
 
 const UserItem = [
 	{ icon: <CiUser className="inline-block" />, path: '/account' },
@@ -28,16 +28,17 @@ const Header = () => {
 	const handleLogOut = () => {
 		CookieService.removeCookie('token')
 		localStorage.removeItem('userName')
+		navigate('/')
 		window.location.reload()
 	}
 
 	// Function to open chat
 	const openChat = () => {
 		// Create and dispatch a custom event to trigger chat opening
-		const chatEvent = new CustomEvent('openJeifyChat', { 
-			detail: { source: 'header' } 
-		});
-		document.dispatchEvent(chatEvent);
+		const chatEvent = new CustomEvent('openJeifyChat', {
+			detail: { source: 'header' },
+		})
+		document.dispatchEvent(chatEvent)
 	}
 
 	return (
@@ -110,7 +111,6 @@ const Header = () => {
 													onClick={(e) => {
 														e.preventDefault()
 														handleLogOut()
-														navigate('/')
 													}}
 													className="hover:border-[1px] text-left hover:shadow-sm px-4 py-2 hover:bg-primary hover:rounded-lg border-b-2"
 												>

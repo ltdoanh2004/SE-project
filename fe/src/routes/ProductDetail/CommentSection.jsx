@@ -26,7 +26,7 @@ const StarRating = ({ rating, setRating }) => {
 			})}
 			{rating > 0 && (
 				<span className="ml-2 text-gray-700">
-					{rating} star{rating !== 1 ? 's' : ''}
+					{rating} sao
 				</span>
 			)}
 		</div>
@@ -85,23 +85,27 @@ const CommentSection = ({ productId }) => {
 
 	useEffect(() => {
 		;(async () => {
-			try {
-				const response = await UserCommentService.getComments(productId)
-        console.log(response)
-				setComments(response.reviews)
-			} catch (error) {
-        setComments([])
-				console.error('Error fetching comments:', error)
-			}
+			await fetchComments()
 		})()
 	}, [])
+
+  const fetchComments = async () => {
+    try {
+			const response = await UserCommentService.getComments(productId)
+			console.log(response)
+			setComments(response.reviews)
+		} catch (error) {
+			setComments([])
+			console.error('Error fetching comments:', error)
+		}
+  }
 
 	const handlePostComment = async () => {
 		if (!commentInput.trim() || userRating === 0) return
 
 		const newComment = {
-			content: commentInput.trim(),
-			stars: userRating,
+			comment: commentInput.trim(),
+			star: userRating,
 		}
 
 		await UserCommentService.postComment(productId, { ...newComment })
@@ -109,7 +113,8 @@ const CommentSection = ({ productId }) => {
 				console.log(res)
 			})
 			.then(() => {
-				setComments([newComment, ...comments])
+				setComments((prevComments) => [
+          ...prevComments,newComment])
 				setCommentInput('')
 				setUserRating(0)
 			})
@@ -122,7 +127,7 @@ const CommentSection = ({ productId }) => {
 		<section className="py-24 relative">
 			<div className="w-full max-w-7xl px-4 md:px-5 lg:px-5 mx-auto">
 				<div className="w-full flex flex-col gap-14">
-					<h2 className="text-gray-900 text-4xl font-bold">Comments</h2>
+					<h2 className="text-gray-900 text-4xl font-bold">Đánh giá</h2>
 
 					{/* Form nhập comment */}
 					<div className="w-full flex flex-col gap-5">
@@ -135,7 +140,7 @@ const CommentSection = ({ productId }) => {
 								/>
 								<div>
 									<p className="text-gray-700 font-medium mb-1">
-										Rate this product
+										Đánh giá của bạn
 									</p>
 									<StarRating rating={userRating} setRating={setUserRating} />
 								</div>
@@ -152,7 +157,7 @@ const CommentSection = ({ productId }) => {
 									}
 								}}
 								className="w-full px-5 py-3 rounded-2xl border border-gray-300 shadow resize-none focus:outline-none placeholder-gray-400 text-gray-900 text-lg"
-								placeholder="Write your thoughts here..."
+								placeholder="Viết cảm nghĩ của bạn về sản phẩm này..."
 							></textarea>
 						</div>
 						<button
@@ -165,8 +170,8 @@ const CommentSection = ({ productId }) => {
 							} transition-all rounded-xl text-black font-semibold`}
 						>
 							{userRating === 0
-								? 'Please rate before posting'
-								: 'Post your comment'}
+								? 'Vui lòng xếp hạng trước khi gửi'
+								: 'Gửi đánh giá'}
 						</button>
 					</div>
 
