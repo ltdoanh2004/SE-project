@@ -87,22 +87,10 @@ const Header = () => {
 											</span>
 											<div className="my-6 flex flex-col">
 												<Link
-													to={'/'}
-													className="hover:border-[1px] hover:shadow-sm px-4 py-2 hover:bg-primary hover:rounded-lg border-b-2"
-												>
-													Tài Khoản
-												</Link>
-												<Link
 													to={'/orders'}
 													className="hover:border-[1px] hover:shadow-sm px-4 py-2 hover:bg-primary hover:rounded-lg border-b-2"
 												>
 													Đơn Hàng
-												</Link>
-												<Link
-													to={'/'}
-													className="hover:border-[1px] hover:shadow-sm px-4 py-2 hover:bg-primary hover:rounded-lg border-b-2"
-												>
-													Yêu Thích
 												</Link>
 												<button
 													onClick={openChat}
@@ -110,6 +98,13 @@ const Header = () => {
 												>
 													Chat
 												</button>
+												<Link
+													to={'/changePassword'}
+													className="hover:border-[1px] hover:shadow-sm px-4 py-2 hover:bg-primary hover:rounded-lg border-b-2"
+												>
+													Đổi Mật Khẩu
+												</Link>
+
 												<button
 													onClick={(e) => {
 														e.preventDefault()

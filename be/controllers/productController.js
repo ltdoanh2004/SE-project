@@ -186,7 +186,7 @@ export const getByJewelry = async (req, res) => {
         // Tìm kiếm sản phẩm với phân trang
         const { count, rows } = await Product.findAndCountAll({
         where: whereClause,
-        attributes: ["productID", "name", "price", "images"], 
+        attributes: ["productID", "name", "price", "images","discount"], 
         limit: limitNumber,
         offset: offset,
         });
@@ -200,6 +200,7 @@ export const getByJewelry = async (req, res) => {
         name: product.name,
         price: product.price,
         image: product.images || [],
+        discount: product.discount || 0,
         }));
 
         res.status(200).json({
