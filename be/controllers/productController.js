@@ -215,7 +215,7 @@ export const getByJewelry = async (req, res) => {
         name: product.name,
         price: product.price,
         image: product.images || [],
-        discount: product.discount || 0,
+        discount: product.discount,
         }));
 
         res.status(200).json({
@@ -241,7 +241,7 @@ export const getProductById = async (req, res) => {
         const product = await Product.findByPk(id, {
         attributes: [
             "productID", "name", "brand", "collection", "jewelryFit", 
-            "material", "price", "productDescription", "images"
+            "material", "price", "productDescription", "images", "discount"
         ]
         });
 
@@ -259,6 +259,7 @@ export const getProductById = async (req, res) => {
         price: product.price,
         productDescription: product.productDescription,
         image: product.images || [],
+        discount: product.discount,
         });
     } catch (error) {
         console.error(error);
