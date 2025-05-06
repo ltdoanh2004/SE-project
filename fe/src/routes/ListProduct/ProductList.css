@@ -1,0 +1,28 @@
+.container-products {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+    width: 100%;
+    justify-content: center;
+}
+
+.filter-sidebar {
+    width: 20%;
+    height: fit-content;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 5px;
+    background: #fff;
+}
+
+.ant-collapse-content {
+    border-top: none !important;
+}
+
+/* .ant-checkbox-wrapper {
+    display: block;
+} */
+
+.slider-container {
+    margin-top: 10px;
+}

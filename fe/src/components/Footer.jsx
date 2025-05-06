@@ -5,7 +5,7 @@ export default function Footer() {
 		<div className="bg-gray-900 text-gray-300 p-4">
 			<div className="text-center">
 				<div>
-					<h3 className="text-lg font-bold mb-3">CONTACT INFO</h3>
+					<h3 className="text-lg font-bold mb-3">THÔNG TIN LIÊN LẠC</h3>
                     <div className="flex justify-center items-start">
                         <ul className="space-y-3 mr-4"> 
                             <li>

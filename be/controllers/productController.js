@@ -168,6 +168,7 @@ export const getByJewelry = async (req, res) => {
         const whereClause = {};
 
         if (jewelryFit) whereClause.jewelryFit = jewelryFit;
+        console.log("Where clause:", whereClause);
 
         if (jewelry) {
             if (jewelry.type) whereClause.jewelryType = jewelry.type;
