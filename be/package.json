@@ -21,6 +21,7 @@
     "crypto-js": "^4.2.0",
     "D": "^1.0.0",
     "dotenv": "^16.4.7",
+    "event-target-shim": "^6.0.2",
     "express": "^4.21.2",
     "fs": "^0.0.1-security",
     "jsonwebtoken": "^9.0.2",

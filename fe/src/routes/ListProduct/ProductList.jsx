@@ -283,7 +283,7 @@ const ProductList = () => {
 				</div>
 			</div>
 
-			<div className="flex-1">
+			<div className="flex-1 min-h-screen">
 				{loading ? (
 					<div className="flex justify-center items-center min-h-[400px]">
 						<LoadingSpinner />
