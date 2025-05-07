@@ -5,7 +5,19 @@ import Product from "../models/Product.js";
 import OrDuct from "../models/OrDuct.js";
 import Pay from "../models/Pay.js";
 import  Op  from "sequelize";
+import nodemailer from "nodemailer";
+import dotenv from "dotenv";
 
+dotenv.config();
+
+// Nodemailer gmail để gửi mail
+const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+        user: process.env.EMAIL_USERNAME,
+        pass: process.env.EMAIL_PASSWORD,
+    },
+});
 
 export const createOrder = async (req, res) => {
     try {
@@ -89,6 +101,61 @@ export const createOrder = async (req, res) => {
             money: totalMoney,
             isPaid: false
         });
+
+        const mailOptions = {
+            from: process.env.EMAIL_USERNAME,
+            to: email,
+            subject: "Order Confirmation - Your Shopping Order",
+            html: `
+                <div style="max-width: 500px; margin: auto; padding: 20px; border: 2px solid #d4af37; border-radius: 10px; text-align: center; font-family: Arial, sans-serif; background: #fff8e1;">
+                    <h2 style="color: #b8860b;">🎉 Your Order Has Been Placed!</h2>
+                    <p style="color: #444;">Thank you for shopping with us. Your order has been successfully placed, and we are processing it now.</p>
+        
+                    <h3 style="color: #b8860b;">Order Details:</h3>
+                    <p style="color: #444;">Order ID: <strong>${newOrder.orderID}</strong></p>
+                    <p style="color: #444;">Total Amount: <strong>${totalMoney.toFixed(0)} VNĐ</strong></p>
+                    <p style="color: #444;">Payment Type: <strong>${payType.charAt(0).toUpperCase() + payType.slice(1)}</strong></p>
+        
+                    <h3 style="color: #b8860b;">Product Details:</h3>
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                        <thead>
+                            <tr>
+                                <th style="padding: 8px; border: 1px solid #ddd; background-color: #f4f4f4;">Product Name</th>
+                                <th style="padding: 8px; border: 1px solid #ddd; background-color: #f4f4f4;">Quantity</th>
+                                <th style="padding: 8px; border: 1px solid #ddd; background-color: #f4f4f4;">Price</th>
+                                <th style="padding: 8px; border: 1px solid #ddd; background-color: #f4f4f4;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${productsToUpdate
+                                .map(({ product, quantity }) => {
+                                    const priceAfterDiscount = product.price * (1 - product.discount / 100);
+                                    const totalProductPrice = priceAfterDiscount * quantity;
+                                    return `
+                                        <tr>
+                                            <td style="padding: 8px; border: 1px solid #ddd;">${product.name}</td>
+                                            <td style="padding: 8px; border: 1px solid #ddd;">${quantity}</td>
+                                            <td style="padding: 8px; border: 1px solid #ddd;">${priceAfterDiscount.toFixed(0)} VNĐ</td>
+                                            <td style="padding: 8px; border: 1px solid #ddd;">${totalProductPrice.toFixed(0)} VNĐ</td>
+                                        </tr>
+                                    `;
+                                })
+                                .join("")}
+                        </tbody>
+                    </table>
+        
+                    <p style="font-size: 12px; color: #888;">Thank you for choosing us! ✨</p>
+                </div>
+            `,
+        };        
+    
+        try {
+            // Gửi mail
+            await transporter.sendMail(mailOptions);
+        } catch (error) {
+            console.error("Error sending email:", error);
+            return res.status(201).json({ orderID: newOrder.orderID }, { message: "Failed to send confirmation order" });
+        }
 
         return res.status(201).json({ orderID: newOrder.orderID });
 
