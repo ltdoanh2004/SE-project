@@ -1,15 +1,21 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { FaRegTrashAlt } from 'react-icons/fa'
 import { FaMinus, FaPlus } from 'react-icons/fa6'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import Contact from '../Home/Contact'
 import { removeFromCart, updateQuantity } from '../../redux/actions/cartActions'
 import { ArrowRight } from 'lucide-react'
 
 const Cart = () => {
+	const [isCheckoutOpen, setIsCheckoutOpen] = useState(false)
+	const [selectedItems, setSelectedItems] = useState({})
+	const [selectAll, setSelectAll] = useState(false)
+
 	const cartItems = useSelector((state) => state.cart.items)
-	const dispatch = useDispatch()
+	console.log(cartItems)
+		const dispatch = useDispatch()
+		const navigate = useNavigate()
 
 	// Calculate subtotal
 	const subtotal = cartItems.reduce(
@@ -20,34 +26,90 @@ const Cart = () => {
 	const discount = 0
 	const total = subtotal + deliveryFee - discount
 
-	const handleRemove = (item) => {
-		// Dispatch an action to remove the item from the cart
-		dispatch(removeFromCart(item.id))
+	// Increase quantity
+	const handleIncrease = (id) => {
+		const item = cartItems.find((item) => item.id === id)
+		if (item) {
+			dispatch({
+				type: 'UPDATE_QUANTITY',
+				payload: { id, quantity: (item.quantity || 1) + 1 },
+			})
+		}
 	}
 
-	const handlechangeQuantity = (item, quantity) => {
-		// Dispatch an action to remove the item from the cart
-		console.log(item.quantity)
-		if(item.quantity < 1) {
-			dispatch(removeFromCart(item.id))
-			}
-		dispatch(updateQuantity(item.id, quantity))
+	// Decrease quantity
+	const handleDecrease = (id) => {
+		const item = cartItems.find((item) => item.id === id)
+		if (item && item.quantity > 1) {
+			dispatch({
+				type: 'UPDATE_QUANTITY',
+				payload: { id, quantity: item.quantity - 1 },
+			})
+		}
 	}
+
+	// Remove product
+	const handleRemove = (id) => {
+		dispatch({ type: 'REMOVE_FROM_CART', payload: id })
+	}
+
+	// Select all products
+	const handleSelectAll = (e) => {
+		const checked = e.target.checked
+		setSelectAll(checked)
+		const newSelected = {}
+		cartItems.forEach((item) => {
+			newSelected[item.id] = checked
+		})
+		setSelectedItems(newSelected)
+	}
+
+	// Select single item
+	const handleSelectItem = (id) => {
+		setSelectedItems((prev) => ({
+			...prev,
+			[id]: !prev[id],
+		}))
+	}
+
+	// Move to Checkout Page
+	const handleGoToCheckout = () => {
+		navigate('/checkout')
+	}
+
+	// Subtotal
+
 	return (
 		<>
 			<div className="container mx-auto py-12">
 				<div className="bg-gray-100 py-10 px-12 rounded-xl">
-					<h1 className="text-center font-semibold text-2xl mb-4">
-						Giỏ hàng của bạn
-					</h1>
+					{/* Header */}
+					<div className="flex items-center justify-between mb-6">
+						<Link
+							to="/"
+							className="text-black-600 font-semibold hover:underline flex items-center gap-2"
+						>
+							<span className="text-lg">←</span> Trở về
+						</Link>
+						<h1 className="text-center font-bold text-2xl">
+							Giỏ hàng của bạn
+						</h1>
+						<div className="w-32"></div>
+					</div>
+
+					{/* Cart Table */}
 
 					<table className="w-full">
 						<thead>
 							<tr>
 								<th colSpan={2} className="border-b border-gray-500 py-4">
 									<div className="flex items-center gap-x-4">
-										<input type="checkbox" name="" id="select-all" />
-
+										<input
+											type="checkbox"
+											id="select-all"
+											checked={selectAll}
+											onChange={handleSelectAll}
+										/>
 										<label
 											htmlFor="select-all"
 											className="font-normal select-none cursor-pointer"
@@ -71,13 +133,17 @@ const Cart = () => {
 								cartItems.map((item) => (
 									<tr key={item.id}>
 										<td className="border-b border-gray-500 py-4">
-											<input type="checkbox" name="" id={`item-${item.id}`} />
+											<input
+												type="checkbox"
+												checked={selectedItems[item.id] || false}
+												onChange={() => handleSelectItem(item.id)}
+											/>
 										</td>
 
 										<td className="border-b border-gray-500 py-4">
 											<div className="flex items-center gap-x-3">
 												<img
-													src={item.image}
+													src={`http://localhost:8000${item.image[0]}`}
 													alt={item.name}
 													className="w-40 h-40 object-cover rounded-md"
 												/>
@@ -92,15 +158,11 @@ const Cart = () => {
 														action=""
 														className="inline-flex items-center border rounded border-black h-10 mt-4"
 													>
-														<div className="px-3 cursor-pointer">
-															<button
-																onClick={(e) => {
-																	e.preventDefault()
-																	handlechangeQuantity(item, item.quantity + 1)
-																}}
-															>
-																<FaPlus />
-															</button>
+														<div
+															className="px-3 cursor-pointer"
+															onClick={() => handleIncrease(item.id)}
+														>
+															<FaPlus />
 														</div>
 
 														<input
@@ -110,15 +172,11 @@ const Cart = () => {
 															readOnly
 														/>
 
-														<div className="px-3 cursor-pointer">
-															<button
-																onClick={(e) => {
-																	e.preventDefault()
-																	handlechangeQuantity(item, item.quantity - 1)
-																}}
-															>
-																<FaMinus />
-															</button>
+														<div
+															className="px-3 cursor-pointer"
+															onClick={() => handleDecrease(item.id)}
+														>
+															<FaMinus />
 														</div>
 													</form>
 												</div>
@@ -132,13 +190,10 @@ const Cart = () => {
 										</td>
 
 										<td className="border-b border-gray-500 py-4">
-											<button
-												onClick={() => {
-													handleRemove(item)
-												}}
-											>
-												<FaRegTrashAlt className="cursor-pointer" />
-											</button>
+											<FaRegTrashAlt
+												className="cursor-pointer text-red-500 hover:text-red-700"
+												onClick={() => handleRemove(item.id)}
+											/>
 										</td>
 									</tr>
 								))
@@ -158,7 +213,7 @@ const Cart = () => {
 					<div className="text-center mt-6 mb-10">
 						<input
 							type="text"
-							placeholder="Discount code"
+							placeholder="Mã giảm giá"
 							className="w-96 bg-transparent rounded-xl h-12 border border-gray-500 px-3 outline-none"
 						/>
 					</div>
@@ -183,16 +238,64 @@ const Cart = () => {
 					</div>
 
 					<div className="text-center mt-4 hover:cursor-pointer">
-						<Link to="/payment">
+						<button
+							onClick={(e) => {
+								e.preventDefault()
+								setIsCheckoutOpen(true)
+							}}
+						>
 							<p className="bg-primary hover:bg-secondary font-semibold px-12 text-center py-3 rounded-xl inline-block">
 								Thanh toán <ArrowRight className="inline-block mb-[1px] ml-1" />
 							</p>
-						</Link>
+						</button>
 					</div>
 				</div>
 			</div>
 
 			<Contact />
+
+			{/* Modal */}
+			{isCheckoutOpen && (
+				<div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+					<div className="bg-white p-8 rounded-lg w-full max-w-lg relative">
+						<button
+							onClick={() => setIsCheckoutOpen(false)}
+							className="absolute top-4 right-4 text-gray-500 hover:text-black"
+						>
+							X
+						</button>
+						<h2 className="text-2xl font-bold mb-4">Tóm tắt đơn hàng</h2>
+						<div className="space-y-4">
+							<div className="flex justify-between">
+								<p>Tạm tính</p>
+								<p>{subtotal.toLocaleString()} VND</p>
+							</div>
+							<div className="flex justify-between">
+								<p>Phí vận chuyển</p>
+								<p>{deliveryFee.toLocaleString()} VND</p>
+							</div>
+							<div className="flex justify-between">
+								<p>Thuế</p>
+								<p>Đã bao gồm</p>
+							</div>
+							<hr />
+							<div className="flex justify-between font-bold text-lg">
+								<p>Tổng cộng</p>
+								<p>{total.toLocaleString()} VND</p>
+							</div>
+						</div>
+						<button
+							className="mt-6 w-full bg-gray-800 text-white py-3 rounded-lg hover:bg-gray-700"
+							onClick={(e) => {
+								e.preventDefault()
+								handleGoToCheckout()
+							}}
+						>
+							Thực hiện thanh toán
+						</button>
+					</div>
+				</div>
+			)}
 		</>
 	)
 }

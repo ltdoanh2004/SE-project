@@ -32,6 +32,7 @@ export default function RegisterPage() {
 					CookieService.setCookie('token', res.token, tokenExp)
 					localStorage.setItem('userName', res.user.userName)
 					navigate('/')
+					window.location.reload()
 				})
 				.catch((error) => {
 					console.log(error)

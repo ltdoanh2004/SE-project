@@ -91,7 +91,7 @@ export const createMomoPayment = async (req, res) => {
         const requestType = "payWithMethod";
         const amount = order.money; // Sử dụng số tiền trong đơn hàng
         const orderId = partnerCode + new Date().getTime(); // Tạo orderId duy nhất
-        const requestId = orderId;  
+        const requestId = orderID; // Sử dụng orderID từ đơn hàng
         const extraData = new Date().toISOString(); // Optional
         const lang = 'vi';
 
@@ -156,6 +156,7 @@ export const momoCallback = async (req, res) => {
             extraData
         } = req.body;
 
+        console.log("Momo Callback Response:", req.body);
         if (resultCode !== 0) {
             const message = { message: "Payment not successful" };
             console.log("⛔ Momo Callback Response:", 400, message);
@@ -171,8 +172,8 @@ export const momoCallback = async (req, res) => {
             return res.status(404);
         }
 
-        const expectedAmount = parseInt(pay.money * 1000);
-        if (parseInt(amount) !== expectedAmount) {
+        console.log("Money :", pay.money, "Amount :", amount);
+        if (Number(amount) !== Number(pay.money)) {
             const message = { message: "Invalid payment amount" };
             console.log("⛔ Momo Callback Response:", 400, message);
             return res.status(400);
@@ -212,6 +213,7 @@ export const createZaloPayPayment = async (req, res) => {
 
         // 2. Lấy orderID từ URL
         const { orderID } = req.params;
+
         const order = await Order.findOne({ where: { orderID, userID } });
         if (!order) {
             return res.status(404).json({ message: "Order not found or doesn't belong to the customer" });
@@ -337,6 +339,15 @@ export const zaloPayCallback = async (req, res) => {
             };
             console.log("⛔ ZaloPay Callback: Order not found with ID", orderID);
             return res.status(404).json(response);
+        }
+
+        if(Number(pay.money) !== Number(data.amount)) {
+            const response = {
+                return_code: -3,
+                return_message: "Invalid payment amount"
+            };
+            console.log("⛔ ZaloPay Callback: Invalid payment amount for order", orderID);
+            return res.status(400).json(response);
         }
 
         pay.isPaid = true;

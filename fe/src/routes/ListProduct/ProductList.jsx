@@ -1,152 +1,153 @@
-import React, { useEffect, useState } from 'react'
-import { Checkbox, Collapse, Slider, Button, Card } from 'antd'
+import React, { useEffect, useLayoutEffect, useState } from 'react'
+import { Checkbox, Collapse, Slider, Button, Card, Radio } from 'antd'
 import './ProductList.css'
-import { useLocation, useNavigate } from 'react-router-dom'
-import { addToCart } from '../../redux/actions/cartActions' // Đường dẫn đã được cập nhật
-import { filter } from 'framer-motion/client'
-import { use } from 'react'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import { addToCart } from '../../redux/actions/cartActions'
 import { useDispatch } from 'react-redux'
+import { ProductService } from '../../services/prod/productService'
+import LoadingSpinner from '../../components/common/LoadingSpiner'
 
 const { Panel } = Collapse
-
-const products = [
-	{
-		id: 1,
-		name: 'Nhẫn Vàng',
-		brand: 'Daniel Wellington',
-		collection: 'Trang Sức Đính Kim Cương',
-		material: 'Vàng',
-		price: 5000000,
-		image:
-			'https://cdn.pnj.io/images/detailed/237/sp-gnxm00y005207-nhan-vang-dinh-da-ecz-pnj-1.png',
-		hoverImage:
-			'https://cdn.pnj.io/images/detailed/237/sp-gnxm00y005207-nhan-vang-dinh-da-ecz-pnj-2.png',
-	},
-	{
-		id: 2,
-		name: 'Dây Chuyền Bạc',
-		brand: 'Calvin Klein',
-		collection: 'Trang Sức Đính ECZ',
-		material: 'Bạc',
-		price: 2000000,
-		image:
-			'https://cdn.pnj.io/images/detailed/212/sp-smxmxmw060063-mat-day-chuyen-bac-dinh-da-pnjsilver-1.png',
-		hoverImage:
-			'https://cdn.pnj.io/images/detailed/212/sp-smxmxmw060063-mat-day-chuyen-bac-dinh-da-pnjsilver-2.png',
-	},
-	{
-		id: 3,
-		name: 'Bông Tai Platinum',
-		brand: 'Michael Kors',
-		collection: 'Trang Sức Công Nghệ Ý',
-		material: 'Platinum',
-		price: 8000000,
-		image:
-			'https://cdn.pnj.io/images/detailed/203/sp-sb0000w000120-bong-tai-bac-style-by-pnj-love-potion-1.png',
-		hoverImage:
-			'https://cdn.pnj.io/images/detailed/203/sp-sb0000w000120-bong-tai-bac-style-by-pnj-love-potion-2.png',
-	},
-	{
-		id: 4,
-		name: 'Nhẫn Vàng',
-		brand: 'Daniel Wellington',
-		collection: 'Trang Sức Đính Kim Cương',
-		material: 'Vàng',
-		price: 5000000,
-		image:
-			'https://cdn.pnj.io/images/detailed/237/sp-gnxm00y005207-nhan-vang-dinh-da-ecz-pnj-1.png',
-		hoverImage:
-			'https://cdn.pnj.io/images/detailed/237/sp-gnxm00y005207-nhan-vang-dinh-da-ecz-pnj-2.png',
-	},
-	{
-		id: 5,
-		name: 'Dây Chuyền Bạc',
-		brand: 'Calvin Klein',
-		collection: 'Trang Sức Đính ECZ',
-		material: 'Bạc',
-		price: 2000000,
-		image:
-			'https://cdn.pnj.io/images/detailed/212/sp-smxmxmw060063-mat-day-chuyen-bac-dinh-da-pnjsilver-1.png',
-		hoverImage:
-			'https://cdn.pnj.io/images/detailed/212/sp-smxmxmw060063-mat-day-chuyen-bac-dinh-da-pnjsilver-2.png',
-	},
-	{
-		id: 6,
-		name: 'Bông Tai Platinum',
-		brand: 'Michael Kors',
-		collection: 'Trang Sức Công Nghệ Ý',
-		material: 'Platinum',
-		price: 8000000,
-		image:
-			'https://cdn.pnj.io/images/detailed/203/sp-sb0000w000120-bong-tai-bac-style-by-pnj-love-potion-1.png',
-		hoverImage:
-			'https://cdn.pnj.io/images/detailed/203/sp-sb0000w000120-bong-tai-bac-style-by-pnj-love-potion-2.png',
-	},
-]
 
 const ProductList = () => {
 	const dispatch = useDispatch()
 	const navigate = useNavigate()
 	const defaultFilters = {
-		type: [],
-		brand: [],
-		collection: [],
-		material: [],
-		price: [100000, 100000000],
+		jewelryFit: undefined,
+		jewelry: {
+			type: undefined,
+			material: undefined,
+			brand: undefined,
+			collection: undefined,
+			price: {
+				min: 100000,
+				max: 100000000,
+			},
+		},
+		page: {
+			number: 1,
+			total: 9,
+		},
 	}
 
 	const [filters, setFilters] = useState(defaultFilters)
+	const [products, setProducts] = useState([])
 	const [filteredProducts, setFilteredProducts] = useState(products)
-	const [activePanels, setActivePanels] = useState([]) // Mặc định tất cả đóng
+	const [activePanels, setActivePanels] = useState([])
 	const [currentImage, setCurrentImage] = useState([])
+	const [loading, setLoading] = useState(true)
+	const routeFilter = useParams()
 
-	const handleCheckboxChange = (category, value) => {
-		setFilters((prev) => {
-			const newValues = prev[category].includes(value)
-				? prev[category].filter((item) => item !== value)
-				: [...prev[category], value]
-			return { ...prev, [category]: newValues }
-		})
+	const applyFilters = async () => {
+		setLoading(true)
+		console.log(filters)
+		try {
+			const res = await ProductService.getFilteredProductList(filters)
+			console.log(res)
+			setProducts(res.products)
+			setFilteredProducts(res.products)
+			setCurrentImage(
+				res.products.map(
+					(product) => `http://localhost:8000${product.image[0]}`,
+				),
+			)
+		} catch (err) {
+			console.error(err)
+		} finally {
+			setLoading(false)
+		}
 	}
 
-	const routeFilter = useLocation()
 	useEffect(() => {
-		setFilters((prev) => ({
-			...prev,
-			[routeFilter.pathname.split('/')[3]]: [
-				routeFilter.pathname.split('/')[4],
-			],
-		}))
-	}, [routeFilter.pathname])
-	console.log(filters)
+		;(async () => {
+			try {
+				const { fit, category, value } = routeFilter
+				setFilters((prev) => ({
+					jewelryFit: fit === 'men' ? 'nam' : fit === 'women' ? 'nữ' : 'trẻ em',
+					jewelry: {
+						[category]:
+							value === 'ring'
+								? 'Nhẫn'
+								: value === 'necklace'
+								? 'Dây chuyền'
+								: value === 'earring'
+								? 'Bông tai'
+								: value === 'bracelet'
+								? 'Lắc Vòng'
+								: value === 'gold'
+								? 'Vàng'
+								: value === 'silver'
+								? 'Bạc'
+								: value === 'platinum'
+								? 'Platinum'
+								: value === 'daniel_wellington'
+								? 'Daniel Wellington'
+								: value === 'calvin_klein'
+								? 'Calvin Klein'
+								: value === 'michael_kors'
+								? 'Michael Kors'
+								: value === 'fossils'
+								? 'Fossils'
+								: value === 'titan'
+								? 'Titan'
+								: value === 'diamond'
+								? 'Trang Sức Đính Kim Cương'
+								: value === 'ecz'
+								? 'Trang Sức Đính ECZ'
+								: value === 'italy'
+								? 'Trang Sức Công Nghệ Ý'
+								: value === 'cz'
+								? 'Trang Sức Đính CZ'
+								: value === 'big_diamond'
+								? 'Kim Cương Viên'
+								: value,
+						price: defaultFilters.jewelry.price,
+					},
+				}))
+			} catch (error) {
+				console.error('Error parsing URL:', error)
+			}
+		})()
+	}, [routeFilter])
+
+	useLayoutEffect(() => {
+		;(async () => {
+			await applyFilters()
+		})()
+	}, [
+		filters.jewelryFit,
+		filters.jewelry.type,
+		filters.jewelry.material,
+		filters.jewelry.brand,
+		filters.jewelry.collection,
+	])
+	const handleCheckboxChange = (category, value) => {
+		setFilters((prev) => {
+			const newFilters = { ...prev }
+			newFilters.jewelry[category] = value
+			return newFilters
+		})
+	}
 
 	useEffect(() => {
 		setCurrentImage(products.map((product) => product.image))
 	}, [])
 
 	const handleSliderChange = (value) => {
-		setFilters((prev) => ({ ...prev, price: value }))
-	}
-
-	const applyFilters = () => {
-		setFilteredProducts(
-			products.filter(
-				(product) =>
-					(filters.type.length === 0 ||
-						filters.type.includes(product.name.split(' ')[0])) &&
-					(filters.brand.length === 0 ||
-						filters.brand.includes(product.brand)) &&
-					(filters.collection.length === 0 ||
-						filters.collection.includes(product.collection)) &&
-					(filters.material.length === 0 ||
-						filters.material.includes(product.material)) &&
-					product.price >= filters.price[0] &&
-					product.price <= filters.price[1],
-			),
-		)
+		setFilters((prev) => ({
+			...prev,
+			jewelry: {
+				...prev.jewelry,
+				price: {
+					min: value[0],
+					max: value[1],
+				},
+			},
+		}))
 	}
 
 	const handleAddToCart = (product) => {
+		console.log(product)
 		dispatch(addToCart(product))
 		navigate('/cart')
 	}
@@ -157,78 +158,100 @@ const ProductList = () => {
 	}
 
 	const handleClickCard = (product) => {
-		// Navigate to product detail page or perform any action you want
 		navigate(`/product/${product.id}`)
 	}
 
 	return (
-		<div className="flex flex-row justify-around px-40 my-20">
-			<div className="filter-sidebar">
+		<div className="flex flex-row justify-around px-40 max-lg:px-5 lg:px-10 lg:gap-4 gap-0 my-20 xl:justify-center">
+			<div className="filter-sidebar max-md:w-[300px] max-xl:w-[300px] max-sm:w-[150px]">
 				<Collapse activeKey={activePanels} onChange={setActivePanels}>
 					<Panel header="Loại" key="1">
-						{['Nhẫn', 'Dây chuyền', 'Bông tai', 'Lắc Vòng'].map((item) => (
-							<div key={item}>
-								<Checkbox onChange={() => handleCheckboxChange('type', item)}>
-									{item}
-								</Checkbox>
-							</div>
-						))}
+						<div>
+							<Radio.Group
+								className="flex flex-col gap-2"
+								value={filters.jewelry.type}
+								options={[
+									{ value: 'nhẫn', label: 'Nhẫn' },
+									{ value: 'dây chuyền', label: 'Dây chuyền' },
+									{ value: 'bông tai', label: 'Bông tai' },
+									{ value: 'vòng tay', label: 'Lắc Vòng' },
+								]}
+								onChange={(e) => handleCheckboxChange('type', e.target.value)}
+							></Radio.Group>
+						</div>
 					</Panel>
 					<Panel header="Thương hiệu" key="2">
-						{[
-							'Daniel Wellington',
-							'Calvin Klein',
-							'Michael Kors',
-							'Titan',
-							'Fossils',
-						].map((item) => (
-							<div key={item}>
-								<Checkbox onChange={() => handleCheckboxChange('brand', item)}>
-									{item}
-								</Checkbox>
-							</div>
-						))}
+						<div>
+							<Radio.Group
+								className="flex flex-col gap-2"
+								value={filters.jewelry.brand}
+								options={[
+									{ value: 'Daniel Wellington', label: 'Daniel Wellington' },
+									{ value: 'Calvin Klein', label: 'Calvin Klein' },
+									{ value: 'Michael Kors', label: 'Michael Kors' },
+									{ value: 'Titan', label: 'Titan' },
+									{ value: 'Fossils', label: 'Fossils' },
+								]}
+								onChange={(e) => handleCheckboxChange('brand', e.target.value)}
+							></Radio.Group>
+						</div>
 					</Panel>
 					<Panel header="Dòng hàng" key="3">
-						{[
-							'Trang Sức Đính Kim Cương',
-							'Trang Sức Đính ECZ',
-							'Trang Sức Công Nghệ Ý',
-							'Trang Sức Đính CZ',
-							'Kim Cương Viên',
-						].map((item) => (
-							<div key={item}>
-								<Checkbox
-									onChange={() => handleCheckboxChange('collection', item)}
-								>
-									{item}
-								</Checkbox>
-							</div>
-						))}
+						<div>
+							<Radio.Group
+								className="flex flex-col gap-2"
+								value={filters.jewelry.collection}
+								options={[
+									{
+										value: 'Trang Sức Đính Kim Cương',
+										label: 'Trang Sức Đính Kim Cương',
+									},
+									{
+										value: 'Trang Sức Đính ECZ',
+										label: 'Trang Sức Đính ECZ',
+									},
+									{
+										value: 'Trang Sức Công Nghệ Ý',
+										label: 'Trang Sức Công Nghệ Ý',
+									},
+									{ value: 'Trang Sức Đính CZ', label: 'Trang Sức Đính CZ' },
+									{ value: 'Kim Cương Viên', label: 'Kim Cương Viên' },
+								]}
+								onChange={(e) =>
+									handleCheckboxChange('collection', e.target.value)
+								}
+							></Radio.Group>
+						</div>
 					</Panel>
 					<Panel header="Chất liệu" key="4">
-						{['Vàng', 'Bạc', 'Platinum'].map((item) => (
-							<div key={item}>
-								<Checkbox
-									onChange={() => handleCheckboxChange('material', item)}
-								>
-									{item}
-								</Checkbox>
-							</div>
-						))}
+						<div>
+							<Radio.Group
+								className="flex flex-col gap-2"
+								value={filters.jewelry.material}
+								options={[
+									{ value: 'vàng', label: 'Vàng' },
+									{ value: 'bạc', label: 'Bạc' },
+									{ value: 'platinum', label: 'Platinum' },
+								]}
+								onChange={(e) =>
+									handleCheckboxChange('material', e.target.value)
+								}
+							></Radio.Group>
+						</div>
 					</Panel>
 					<Panel header="Giá" key="5">
 						<Slider
 							range
 							min={100000}
 							max={100000000}
+							defaultValue={[100000, 100000000]}
+							value={[filters.jewelry.price.min, filters.jewelry.price.max]}
 							step={100000}
-							value={filters.price}
 							onChange={handleSliderChange}
 						/>
 						<div>
-							Giá: {filters.price[0].toLocaleString()} VND -{' '}
-							{filters.price[1].toLocaleString()} VND
+							Giá: {filters.jewelry.price.min.toLocaleString()} VND -{' '}
+							{filters.jewelry.price.max.toLocaleString()} VND
 						</div>
 					</Panel>
 				</Collapse>
@@ -241,6 +264,7 @@ const ProductList = () => {
 							marginLeft: '10px',
 							width: '100px',
 						}}
+						disabled={loading}
 					>
 						Đặt lại
 					</Button>
@@ -252,60 +276,81 @@ const ProductList = () => {
 							marginTop: '10px',
 							width: '100px',
 						}}
+						loading={loading}
 					>
-						Lọc
+						{loading ? 'Đang lọc' : 'Lọc'}
 					</Button>
 				</div>
 			</div>
-			<div className="product-list">
-				{filteredProducts.map((product, index) => {
-					return (
-						<Card
-							onClick={() => handleClickCard(product)}
-							key={product.id}
-							style={{ width: 350, height: 350, textAlign: 'center' }}
-							className="hover:cursor-pointer"
-							onMouseEnter={() =>
-								setCurrentImage((prev) => ({
-									...prev,
-									[index]: product.hoverImage,
-								}))
-							}
-							onMouseLeave={() =>
-								setCurrentImage((prev) => ({
-									...prev,
-									[index]: product.image,
-								}))
-							}
-						>
-							<img
-								src={currentImage[index]}
-								alt={product.name}
-								style={{ width: '100%', height: '150px', objectFit: 'cover' }}
-							/>
-							<p style={{ margin: '10px 0' }}>{product.name}</p>
-							<p
-								style={{
-									fontWeight: 'bold',
-									color: '#C48C46',
-									margin: '10px 0',
-								}}
-							>
-								{product.price.toLocaleString()} VND
-							</p>
-							<Button
-								className="bg-primary hover:!bg-secondary text-black"
-								type="primary"
-								onClick={(e) => {
-									e.stopPropagation()
-									handleAddToCart(product)
-								}}
-							>
-								Thêm vào giỏ hàng
-							</Button>
-						</Card>
-					)
-				})}
+
+			<div className="flex-1">
+				{loading ? (
+					<div className="flex justify-center items-center min-h-[400px]">
+						<LoadingSpinner />
+						<p className="ml-4 text-gray-600">Đang tải sản phẩm...</p>
+					</div>
+				) : (
+					<div className="grid grid-cols-3 gap-4 max-md:grid-cols-2 max-lg:grid-cols-2">
+						{filteredProducts.length > 0 ? (
+							filteredProducts.map((product, index) => {
+								return (
+									<Card
+										onClick={() => handleClickCard(product)}
+										key={product.id}
+										style={{ textAlign: 'center' }}
+										className="hover:cursor-pointer 2xl:w-[300px] xl:w-[300px] max-lg:w-[250px] lg:w-[240px] max-md:w-[250px] max-sm:w-[150px]"
+										onMouseEnter={() =>
+											setCurrentImage((prev) => ({
+												...prev,
+												[index]: `http://localhost:8000${product.image[1]}`,
+											}))
+										}
+										onMouseLeave={() =>
+											setCurrentImage((prev) => ({
+												...prev,
+												[index]: `http://localhost:8000${product.image[0]}`,
+											}))
+										}
+									>
+										<img
+											src={currentImage[index]}
+											alt={product.name}
+											style={{
+												width: '100%',
+												height: '150px',
+												objectFit: 'cover',
+											}}
+										/>
+										<p style={{ margin: '10px 0' }}>{product.name}</p>
+										<p
+											style={{
+												fontWeight: 'bold',
+												color: '#C48C46',
+												margin: '10px 0',
+											}}
+										>
+											{new Number(product.price).toLocaleString()} VND
+										</p>
+										<Button
+											className="bg-primary hover:!bg-secondary text-black"
+											type="primary"
+											onClick={(e) => {
+												e.stopPropagation()
+												handleAddToCart(product)
+											}}
+										>
+											Thêm vào giỏ hàng
+										</Button>
+									</Card>
+								)
+							})
+						) : (
+							<div className="col-span-3 text-center py-10">
+								<p className="text-gray-500">Không tìm thấy sản phẩm phù hợp</p>
+							</div>
+						)}
+					</div>
+				)}
 			</div>
 		</div>
 	)

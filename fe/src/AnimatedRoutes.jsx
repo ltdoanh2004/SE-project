@@ -14,11 +14,16 @@ import Jewelry from './routes/Jewelry'
 import NotFound from './routes/NotFound'
 
 import ProductPage from './routes/Product/ProductPage'
+import { ProductDetail } from './routes/ProductDetail/ProductDetail';
 import ConfirmOrderPage from './routes/Order/OrderConfirm'
 import ProductList from './routes/ListProduct/ProductList'
 import OrderDashboard from './routes/admin/OrderDasboard'
 import EmployeeDashboard from './routes/admin/EmployeeDasboard'
 import Cart from './routes/cart/Cart'
+import Checkout from './routes/Checkout'
+import OrderList from './routes/Order/OrderList'
+import OrderDetail from './routes/Order/OrderDetail'
+import ChangePassword from './routes/Login/ChangePassword'
 
 // Import transitions
 
@@ -29,10 +34,11 @@ export default function AnimatedRoutes() {
 			<Route path="/" element={<Home />} />
 			<Route path="/jewelry">
 				<Route index element={<Jewelry />} />
-				<Route path=":sex/:filter/:query" element={<ProductList />} />
+				<Route path=":fit/:category/:value" element={<ProductList />} />
 			</Route>
 			<Route path="/login" element={<Login />} />
 			<Route path="/register" element={<Register />} />
+			<Route path="/changePassword" element={<ChangePassword />} />
 			<Route path="/cart" element={<Cart />} />
 			{/* <Route path="/jewelry/:product_type" element={<FilterSidebar/>} /> */}
 			{/* <Route path='/product/:id' element={<ProductPage/>}/> */}
@@ -47,6 +53,9 @@ export default function AnimatedRoutes() {
 				<Route path="order" element={<OrderDashboard />} />
 				<Route path="employee" element={<EmployeeDashboard />} />
 			</Route>
+			<Route path="/checkout" element={<Checkout />} />
+			<Route path="/orders" element={<OrderList />} />
+			<Route path="/orders/:orderId" element={<OrderDetail />} />
 
 			{/* <Route path="/about" element={<About />} /> */}
 			{/* <Route path="/contact" element={<Contact />} /> */}

@@ -7,7 +7,7 @@ export const links = [
 				Head: 'Chủng loại',
 				sublink: [
 					{ name: 'Nhẫn', link: 'jewelry/men/type/ring' },
-					{ name: 'Dây chuyền', link: 'jewelry/men/type//necklace' },
+					{ name: 'Dây chuyền', link: 'jewelry/men/type/necklace' },
 					{ name: 'Bông tai', link: 'jewelry/men/type/earring' },
 					{ name: 'Vòng', link: 'jewelry/men/type/bracelet' },
 				],
@@ -39,7 +39,7 @@ export const links = [
 				sublink: [
 					{
 						name: 'Trang Sức Đính Kim Cương',
-						link: 'jewelry/men/collection/diamon',
+						link: 'jewelry/men/collection/diamond',
 					},
 					{ name: 'Trang Sức Đính ECZ', link: 'jewelry/men/collection/ecz' },
 					{
@@ -47,7 +47,7 @@ export const links = [
 						link: 'jewelry/men/collection/italy',
 					},
 					{ name: 'Trang Sức Đính CZ', link: 'jewelry/men/collection/cz' },
-					{ name: 'Kim Cương Viên', link: 'jewelry/men/collection/big_diamon' },
+					{ name: 'Kim Cương Viên', link: 'jewelry/men/collection/big_diamond' },
 				],
 			},
 		],
@@ -60,7 +60,7 @@ export const links = [
 				Head: 'Chủng loại',
 				sublink: [
 					{ name: 'Nhẫn', link: 'jewelry/women/type/ring' },
-					{ name: 'Dây chuyền', link: 'jewelry/women/type//necklace' },
+					{ name: 'Dây chuyền', link: 'jewelry/women/type/necklace' },
 					{ name: 'Bông tai', link: 'jewelry/women/type/earring' },
 					{ name: 'Vòng', link: 'jewelry/women/type/bracelet' },
 				],
@@ -92,7 +92,7 @@ export const links = [
 				sublink: [
 					{
 						name: 'Trang Sức Đính Kim Cương',
-						link: 'jewelry/women/collection/diamon',
+						link: 'jewelry/women/collection/diamond',
 					},
 					{ name: 'Trang Sức Đính ECZ', link: 'jewelry/women/collection/ecz' },
 					{
@@ -102,7 +102,7 @@ export const links = [
 					{ name: 'Trang Sức Đính CZ', link: 'jewelry/women/collection/cz' },
 					{
 						name: 'Kim Cương Viên',
-						link: 'jewelry/women/collection/big_diamon',
+						link: 'jewelry/women/collection/big_diamond',
 					},
 				],
 			},
@@ -116,7 +116,7 @@ export const links = [
 				Head: 'Chủng loại',
 				sublink: [
 					{ name: 'Nhẫn', link: 'jewelry/children/type/ring' },
-					{ name: 'Dây chuyền', link: 'jewelry/children/type//necklace' },
+					{ name: 'Dây chuyền', link: 'jewelry/children/type/necklace' },
 					{ name: 'Bông tai', link: 'jewelry/children/type/earring' },
 					{ name: 'Vòng', link: 'jewelry/children/type/bracelet' },
 				],
@@ -148,7 +148,7 @@ export const links = [
 				sublink: [
 					{
 						name: 'Trang Sức Đính Kim Cương',
-						link: 'jewelry/children/collection/diamon',
+						link: 'jewelry/children/collection/diamond',
 					},
 					{ name: 'Trang Sức Đính ECZ', link: 'jewelry/children/collection/ecz' },
 					{
@@ -156,7 +156,7 @@ export const links = [
 						link: 'jewelry/children/collection/italy',
 					},
 					{ name: 'Trang Sức Đính CZ', link: 'jewelry/children/collection/cz' },
-					{ name: 'Kim Cương Viên', link: 'jewelry/children/collection/big_diamon' },
+					{ name: 'Kim Cương Viên', link: 'jewelry/children/collection/big_diamond' },
 				],
 			},
 		],

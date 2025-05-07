@@ -1,10 +1,11 @@
 import express from "express"; 
 import dotenv from "dotenv";
-import appRoute from "./routes/index.js"; 
+import appRouter from "./router/index.js"; 
 import { connectToDatabase, sequelize } from "./DB/index.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import cors from "cors";
+import cronJob from './jobs/cronJob.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -17,9 +18,11 @@ const HOST = process.env.HOST || "localhost";
 
 app.use(cors());
 app.use(express.json());
-app.use("/api", appRoute);
+app.use("/api", appRouter);
 app.use("/image", express.static(path.join(__dirname, "data", "images")));
 app.use("/models", express.static(path.join(__dirname, "data", "models")));
+
+cronJob();
 
 const startServer = async () => {
   try {

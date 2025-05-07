@@ -157,7 +157,7 @@ const cleanupUploadedFiles = (files) => {
 // Lấy sản phẩm theo các điều kiện lọc
 export const getByJewelry = async (req, res) => {
     try {
-        const { jewelryFit, jewelry, page } = req.query; // Lấy từ req.query thay vì req.body
+        const { jewelryFit, jewelry, page } = req.body;
 
         // Lấy thông tin phân trang
         const pageNumber = parseInt(page?.number) || 1; 
@@ -168,23 +168,40 @@ export const getByJewelry = async (req, res) => {
         const whereClause = {};
 
         if (jewelryFit) whereClause.jewelryFit = jewelryFit;
+        console.log("Where clause:", whereClause);
 
         if (jewelry) {
-        if (jewelry.type) whereClause.jewelryType = jewelry.type;
-        if (jewelry.material) whereClause.material = jewelry.material;
-        if (jewelry.brand) whereClause.brand = jewelry.brand;
-        if (jewelry.collection) whereClause.collection = jewelry.collection;
-        if (jewelry.price && jewelry.price.min && jewelry.price.max) {
-            whereClause.price = {
-            [Op.between]: [parseFloat(jewelry.price.min), parseFloat(jewelry.price.max)],
-            };
-        }
+            if (jewelry.type) whereClause.jewelryType = jewelry.type;
+            if (jewelry.material) whereClause.material = jewelry.material;
+            if (jewelry.brand) whereClause.brand = jewelry.brand;
+            if (jewelry.collection) whereClause.collection = jewelry.collection;
+            if (jewelry.price) {
+                if (jewelry.price.min && jewelry.price.max) {
+                    // Cả min và max đều có
+                    whereClause.price = {
+                        [Op.between]: [
+                            parseFloat(jewelry.price.min),
+                            parseFloat(jewelry.price.max)
+                        ],
+                    };
+                } else if (jewelry.price.min) {
+                    // Chỉ có min
+                    whereClause.price = {
+                        [Op.gte]: parseFloat(jewelry.price.min),
+                    };
+                } else if (jewelry.price.max) {
+                    // Chỉ có max
+                    whereClause.price = {
+                        [Op.lte]: parseFloat(jewelry.price.max),
+                    };
+                }
+            }
         }
 
         // Tìm kiếm sản phẩm với phân trang
         const { count, rows } = await Product.findAndCountAll({
         where: whereClause,
-        attributes: ["productID", "name", "price", "images"], 
+        attributes: ["productID", "name", "price", "images","discount"], 
         limit: limitNumber,
         offset: offset,
         });
@@ -198,6 +215,7 @@ export const getByJewelry = async (req, res) => {
         name: product.name,
         price: product.price,
         image: product.images || [],
+        discount: product.discount || 0,
         }));
 
         res.status(200).json({

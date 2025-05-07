@@ -1,7 +1,7 @@
 import { useContext, useState } from 'react'
 import Logo from '../assets/logo.png'
 import NavLinks from '../components/Navbar/NavLinks'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import avatar from '../assets/image/banner2.png'
 import { Drawer } from 'vaul'
 
@@ -13,6 +13,7 @@ import {
 } from 'react-icons/ci'
 import { Search, ShoppingCart, MessageCircle } from 'lucide-react'
 import { AuthProvider, UserPublicInfoProvider } from './provider/provider'
+import { CookieService } from '../utils/CookieService'
 
 const UserItem = [
 	{ icon: <CiUser className="inline-block" />, path: '/account' },
@@ -23,19 +24,26 @@ const Header = () => {
 	const [open, setOpen] = useState(false)
 	const { isAuth, SetIsAuth } = useContext(AuthProvider)
 	const userName = localStorage.getItem('userName')
+	const navigate = useNavigate()
+	const handleLogOut = () => {
+		CookieService.removeCookie('token')
+		localStorage.removeItem('userName')
+		navigate('/')
+		window.location.reload()
+	}
 
 	// Function to open chat
 	const openChat = () => {
 		// Create and dispatch a custom event to trigger chat opening
-		const chatEvent = new CustomEvent('openJeifyChat', { 
-			detail: { source: 'header' } 
-		});
-		document.dispatchEvent(chatEvent);
+		const chatEvent = new CustomEvent('openJeifyChat', {
+			detail: { source: 'header' },
+		})
+		document.dispatchEvent(chatEvent)
 	}
 
 	return (
-		<nav className="bg-primary text-black ">
-			<div className="container mx-auto flex justify-between items-center">
+		<nav className="bg-primary text-black w-full h-20 px-4">
+			<div className="flex justify-between items-center 2xl:justify-center 2xl:gap-40">
 				<div className="flex items-center justify-center">
 					<Link
 						to="/"
@@ -81,22 +89,10 @@ const Header = () => {
 											</span>
 											<div className="my-6 flex flex-col">
 												<Link
-													to={'/'}
-													className="hover:border-[1px] hover:shadow-sm px-4 py-2 hover:bg-primary hover:rounded-lg border-b-2"
-												>
-													Tài Khoản
-												</Link>
-												<Link
-													to={'/'}
+													to={'/orders'}
 													className="hover:border-[1px] hover:shadow-sm px-4 py-2 hover:bg-primary hover:rounded-lg border-b-2"
 												>
 													Đơn Hàng
-												</Link>
-												<Link
-													to={'/'}
-													className="hover:border-[1px] hover:shadow-sm px-4 py-2 hover:bg-primary hover:rounded-lg border-b-2"
-												>
-													Yêu Thích
 												</Link>
 												<button
 													onClick={openChat}
@@ -105,11 +101,21 @@ const Header = () => {
 													Chat
 												</button>
 												<Link
-													to={'/'}
+													to={'/changePassword'}
 													className="hover:border-[1px] hover:shadow-sm px-4 py-2 hover:bg-primary hover:rounded-lg border-b-2"
 												>
-													Đăng Xuất
+													Đổi Mật Khẩu
 												</Link>
+
+												<button
+													onClick={(e) => {
+														e.preventDefault()
+														handleLogOut()
+													}}
+													className="hover:border-[1px] text-left hover:shadow-sm px-4 py-2 hover:bg-primary hover:rounded-lg border-b-2"
+												>
+													Đăng Xuất
+												</button>
 											</div>
 										</div>
 									</Drawer.Content>
