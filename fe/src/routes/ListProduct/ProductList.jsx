@@ -338,7 +338,7 @@ const ProductList = () => {
 										<p style={{ margin: '10px 0' }}>{product.name}</p>
 										{/* Price display with discount */}
 										<div className="my-3">
-											{product.discount ? (
+											{product.discount && product.discount > 0 ? (
 												<div className="flex flex-wrap items-center justify-center gap-2">
 													<span className="text-gray-500 line-through">
 														{new Number(product.price).toLocaleString()} VND
