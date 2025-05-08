@@ -8,6 +8,7 @@ import { UserAuthenticationService } from '../../services/user/auth/userAuthenti
 import { CookieService } from '../../utils/CookieService'
 import { TokenService } from '../../utils/tokenService'
 import { flushSync } from 'react-dom'
+import { useState } from 'react'
 
 export default function LoginPage() {
 	const {
@@ -19,34 +20,39 @@ export default function LoginPage() {
 	const dispatch = useDispatch()
 	const navigate = useNavigate() // Initialize useNavigate
 	const errorMessage = useSelector((state) => state.user.errorMessage) // Access error message from Redux state
-
+	const [loginError, setLoginError] = useState('')
 	const onSubmit = async (data) => {
-		console.log(data)
-		try {
-			UserAuthenticationService.login(data).then(async (res) => {
-				console.log(res)
+		await UserAuthenticationService.login(data)
+			.then(async (res) => {
+				if (!res.token) {
+					throw new Error(res.response.data.message)
+				}
 				const tokenPayload = await TokenService.decodeToken(res.token)
 				const tokenExp = await new Date(tokenPayload.exp * 1000)
 				CookieService.setCookie('token', res.token, tokenExp)
 				localStorage.setItem('userName', res.user.userName)
-				navigate('/', )
+				navigate('/')
 				window.location.reload()
 			})
-		} catch (error) {
-			console.error(error)
-		}
+			.catch(({ name, message }) => {
+				console.log(name, message)
+				if (name == 'Error') {
+					// The request was made and the server responded with a status code
+					setLoginError(message)
+				} else setLoginError('Không thể kết nối đến máy chủ')
+			})
 	}
 
 	const handleForgotPassword = (e) => {
 		e.preventDefault() // Prevent button default behavior
 		try {
-			const email = getValues("email")
+			const email = getValues('email')
 			if (email) {
 				UserAuthenticationService.forgotPassword(email).then((res) => {
 					alert(res.message)
 				})
 			} else {
-				alert("Please enter your email address in the email field")
+				alert('Please enter your email address in the email field')
 			}
 		} catch (error) {
 			console.error(error)
@@ -86,6 +92,7 @@ export default function LoginPage() {
 						{errors.password && (
 							<span className="text-red-500">This field is required</span>
 						)}
+
 						<div className="text-right">
 							<button
 								onClick={handleForgotPassword}
@@ -95,6 +102,13 @@ export default function LoginPage() {
 							</button>
 						</div>
 					</div>
+					{loginError !== '' ? (
+						<span className="text-red-500 text-sm">
+							{String(loginError)}
+						</span>
+					) : (
+						''
+					)}
 					<input
 						type="submit"
 						className="w-full px-4 py-2 font-bold text-white hover:cursor-pointer hover:bg-secondary bg-primary rounded hover:bg-primary-dark focus:outline-none focus:shadow-outline"

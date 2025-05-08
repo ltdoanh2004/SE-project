@@ -10,24 +10,28 @@ const Checkout = () => {
 	const cartItems = location?.state?.product
 		? [location?.state.product]
 		: useSelector((state) => state.cart.items)
-	console.log(cartItems)
+	console.log(location?.state?.discountedPrice)
 
 	// State cho contact info
 	const [contactName, setContactName] = useState('')
 	const [contactNumber, setContactNumber] = useState('')
 	const [billingAddress, setBillingAddress] = useState('')
-	const [paymentMethod, setPaymentMethod] = useState('momo')
+	const [paymentMethod, setPaymentMethod] = useState('cod')
 	const discountPercent = 0
 
 	// Add shipping fee
-	const shippingFee = 30000 // 30,000 VND for shipping
 
 	const subtotal = cartItems.reduce(
-		(total, item) => total + item.price * (item.quantity || 1),
+		(total, item) =>
+			total +
+			(location?.state?.discountedPrice
+				? location?.state?.discountedPrice
+				: item.price) *
+				(item.quantity || 1),
 		0,
 	)
 	const discount = subtotal * discountPercent
-	const total = subtotal + discount + shippingFee
+	const total = subtotal - discount
 	const { isAuth } = useContext(AuthProvider)
 	const navigate = useNavigate()
 
@@ -56,23 +60,34 @@ const Checkout = () => {
 			}
 
 			// Handle online payment methods
-			await OrderService.creatOrder(orderPayload).then(async (res) => {
-				const orderID = res.orderID
-				if (paymentMethod === 'zalopay') {
-					await OrderService.payByZalo(orderID).then((res) => {
-						const payUrl = res.order_url
-						window.open(payUrl, '_blank')
-						resolve()
-					})
-				}
-				if (paymentMethod === 'momo') {
-					await OrderService.payByMomo(orderID).then((res) => {
-						const payUrl = res.paymentUrl
-						window.open(payUrl, '_blank')
-						resolve()
-					})
-				}
-			})
+			await OrderService.creatOrder(orderPayload)
+				.then(async (res) => {
+					console.log(res)
+					if (res.status === 400) {
+						reject(res)
+						return
+					}
+					const orderID = res.orderID
+					if (paymentMethod === 'zalopay') {
+						await OrderService.payByZalo(orderID).then((res) => {
+							const payUrl = res.order_url
+							window.open(payUrl, '_blank')
+							resolve()
+						})
+					}
+					if (paymentMethod === 'momo') {
+						await OrderService.payByMomo(orderID).then((res) => {
+							const payUrl = res.paymentUrl
+							window.open(payUrl, '_blank')
+							resolve()
+						})
+					}
+				})
+				.catch((error) => {
+					console.error('Error creating order:', error)
+				})
+		}).catch((error) => {
+			alert('Có lỗi xảy ra trong quá trình thanh toán. Vui lòng thử lại sau.')
 		})
 	}
 	if (!isAuth) {
@@ -208,7 +223,12 @@ const Checkout = () => {
 								</div>
 								<div>
 									<span className="font-semibold text-gray-600 text-xl">
-										{Number(item.price).toLocaleString()} VND
+										{Number(
+											location?.state?.discountedPrice 
+												? location.state.discountedPrice
+												: item.price,
+										).toLocaleString()}{' '}
+										VND
 									</span>
 								</div>
 							</div>
@@ -243,9 +263,7 @@ const Checkout = () => {
 							</div>
 							<div className="flex justify-between mb-3">
 								<span className="text-gray-600">Phí vận chuyển</span>
-								<span className="font-semibold">
-									{shippingFee.toLocaleString()} VND
-								</span>
+								<span className="font-semibold">Miễn phí</span>
 							</div>
 							<div className="flex justify-between">
 								<span className="text-gray-600">Giảm giá</span>

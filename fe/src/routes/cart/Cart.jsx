@@ -22,9 +22,8 @@ const Cart = () => {
 		(total, item) => total + item.price * (item.quantity || 1),
 		0,
 	)
-	const deliveryFee = 30000
 	const discount = 0
-	const total = subtotal + deliveryFee - discount
+	const total = subtotal - discount
 
 	// Increase quantity
 	const handleIncrease = (id) => {
@@ -228,7 +227,7 @@ const Cart = () => {
 					</div>
 					<div className="flex items-center py-1 justify-between font-semibold">
 						<p>Phí vận chuyển:</p>
-						<p>{deliveryFee.toLocaleString()} VND</p>
+						<p>Miễn phí</p>
 					</div>
 					<div className="flex items-center py-1 justify-between font-semibold">
 						<p>Tổng cộng:</p>
@@ -272,7 +271,7 @@ const Cart = () => {
 							</div>
 							<div className="flex justify-between">
 								<p>Phí vận chuyển</p>
-								<p>{deliveryFee.toLocaleString()} VND</p>
+								<p>Miễn phí</p>
 							</div>
 							<div className="flex justify-between">
 								<p>Thuế</p>

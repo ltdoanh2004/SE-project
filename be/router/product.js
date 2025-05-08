@@ -3,7 +3,7 @@ import {getByJewelry,getProductById, deleteProductById,uploadProductFiles,addPro
 
 const router = express.Router();
 
-router.get("/get-Jewelry", getByJewelry);
+router.post("/get-Jewelry", getByJewelry);
 
 router.get("/:id", getProductById);
 
