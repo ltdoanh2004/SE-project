@@ -11,7 +11,7 @@ import {
 	CiShoppingCart,
 	CiUser,
 } from 'react-icons/ci'
-import { Search, ShoppingCart, MessageCircle } from 'lucide-react'
+import { Search, ShoppingCart, Palette } from 'lucide-react'
 import { AuthProvider, UserPublicInfoProvider } from './provider/provider'
 import { CookieService } from '../utils/CookieService'
 
@@ -30,15 +30,6 @@ const Header = () => {
 		localStorage.removeItem('userName')
 		navigate('/')
 		window.location.reload()
-	}
-
-	// Function to open chat
-	const openChat = () => {
-		// Create and dispatch a custom event to trigger chat opening
-		const chatEvent = new CustomEvent('openJeifyChat', {
-			detail: { source: 'header' },
-		})
-		document.dispatchEvent(chatEvent)
 	}
 
 	return (
@@ -94,12 +85,12 @@ const Header = () => {
 												>
 													Đơn Hàng
 												</Link>
-												<button
-													onClick={openChat}
+												<Link
+													to={'/jewelry'}
 													className="text-left hover:border-[1px] hover:shadow-sm px-4 py-2 hover:bg-primary hover:rounded-lg border-b-2"
 												>
-													Chat
-												</button>
+													Tùy Chỉnh Trang Sức
+												</Link>
 												<Link
 													to={'/changePassword'}
 													className="hover:border-[1px] hover:shadow-sm px-4 py-2 hover:bg-primary hover:rounded-lg border-b-2"
@@ -132,15 +123,15 @@ const Header = () => {
 								to="/login"
 								className="bg-white text-primary font-bold text-lg py-2 px-4 rounded"
 							>
-								Log in
+								Đăng nhập
 							</Link>
-							<button
-								onClick={openChat}
+							<Link
+								to="/jewelry"
 								className="bg-white text-primary font-bold text-lg py-2 px-4 rounded flex items-center gap-2"
 							>
-								<MessageCircle size={18} />
-								Chat
-							</button>
+								<Palette size={18} />
+								Tùy Chỉnh
+							</Link>
 						</li>
 					)}
 				</ul>

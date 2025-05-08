@@ -1,6 +1,11 @@
 import { Op } from "sequelize";
 import Product from "../models/Product.js";
 
+// Configure frontend URL for product links
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+// Configure backend URL for image paths
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8000';
+
 // Search products API for chatbot
 export const searchProducts = async (req, res) => {
   try {
@@ -57,19 +62,48 @@ export const searchProducts = async (req, res) => {
         "name", 
         "price", 
         "productDescription",
-        "images"
+        "images",
+        "jewelryType",
+        "material"
       ],
       limit: 5 // Limit to 5 results
     });
 
-    // Format response
-    const formattedProducts = products.map(product => ({
-      name: product.name,
-      description: product.productDescription,
-      price: product.price,
-      link: `/product/${product.productID}`,
-      image: product.images && product.images.length > 0 ? product.images[0] : null
-    }));
+    if (products.length === 0) {
+      // If no products found, return empty result with message
+      return res.status(200).json({
+        success: true,
+        message: "Không tìm thấy sản phẩm phù hợp",
+        products: []
+      });
+    }
+
+    // Format response with complete image URLs
+    const formattedProducts = products.map(product => {
+      // Handle image paths
+      let imagePath = null;
+      if (product.images && product.images.length > 0) {
+        // Check if the image path already starts with http or /image
+        const imageSrc = product.images[0];
+        if (imageSrc.startsWith('http')) {
+          imagePath = imageSrc;
+        } else if (imageSrc.startsWith('/image')) {
+          imagePath = `${BACKEND_URL}${imageSrc}`;
+        } else {
+          imagePath = `${BACKEND_URL}/image/${imageSrc}`;
+        }
+      }
+
+      return {
+        name: product.name,
+        description: product.productDescription,
+        price: product.price,
+        link: `${FRONTEND_URL}/product/${product.productID}`,
+        image: imagePath,
+        type: product.jewelryType,
+        material: product.material
+      };
+    });
 
     res.status(200).json({
       success: true,

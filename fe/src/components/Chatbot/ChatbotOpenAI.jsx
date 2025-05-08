@@ -9,6 +9,7 @@ const BASE_URL = window.location.hostname === 'localhost' ? 'http://localhost:80
 const API_URL = `${BASE_URL}/api`;
 console.log("ChatbotOpenAI Component Loaded!");
 console.log("Using API URL:", API_URL);
+console.log("Using Base URL for images:", BASE_URL);
 
 // Chatbot component with OpenAI integration
 const ChatbotOpenAI = ({ embedded = false }) => {
@@ -17,7 +18,7 @@ const ChatbotOpenAI = ({ embedded = false }) => {
   const [messages, setMessages] = useState([
     { 
       role: 'assistant',
-      content: 'Hello! 👋 I\'m your jewelry consultant. How can I help you today?', 
+      content: 'Xin chào! 👋 Tôi là tư vấn viên trang sức của bạn. Tôi có thể giúp gì cho bạn hôm nay?', 
       products: [] 
     }
   ]);
@@ -45,9 +46,9 @@ const ChatbotOpenAI = ({ embedded = false }) => {
 
   // Format price to currency
   const formatPrice = (price) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'VND'
     }).format(price);
   };
 
@@ -223,7 +224,11 @@ const ChatbotOpenAI = ({ embedded = false }) => {
                          userMessage.toLowerCase().includes('bạc') ||
                          userMessage.toLowerCase().includes('vàng') ||
                          userMessage.toLowerCase().includes('đua tôi') ||
-                         userMessage.toLowerCase().includes('nhân bạc');
+                         userMessage.toLowerCase().includes('nhân bạc') ||
+                         userMessage.toLowerCase().includes('tìm') || 
+                         userMessage.toLowerCase().includes('kiếm') ||
+                         userMessage.toLowerCase().includes('mua') ||
+                         userMessage.toLowerCase().includes('có');
       
       // Kiểm tra cụ thể cho nhẫn bạc
       const isSilverRingRequest = userMessage.toLowerCase().includes('nhẫn bạc') || 
@@ -328,9 +333,14 @@ const ChatbotOpenAI = ({ embedded = false }) => {
                       {product.image && (
                         <div className="w-16 h-16 bg-gray-100 rounded mr-2 flex-shrink-0 overflow-hidden">
                           <img 
-                            src={product.image} 
+                            src={product.image}
                             alt={product.name} 
                             className="w-full h-full object-cover"
+                            onError={(e) => {
+                              console.error("Image failed to load:", product.image);
+                              e.target.src = `${BASE_URL}/image/placeholder.png`; // Fallback image từ backend
+                              e.target.onerror = null; // Prevent infinite loops
+                            }}
                           />
                         </div>
                       )}
@@ -369,7 +379,7 @@ const ChatbotOpenAI = ({ embedded = false }) => {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Type your message..."
+              placeholder="Nhập tin nhắn của bạn..."
               className="flex-1 border border-gray-300 rounded-l-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-yellow-500"
             />
             <button 
@@ -415,9 +425,14 @@ const ChatbotOpenAI = ({ embedded = false }) => {
                     {product.image && (
                       <div className="w-16 h-16 bg-gray-100 rounded mr-2 flex-shrink-0 overflow-hidden">
                         <img 
-                          src={product.image} 
+                          src={product.image}
                           alt={product.name} 
                           className="w-full h-full object-cover"
+                          onError={(e) => {
+                            console.error("Image failed to load:", product.image);
+                            e.target.src = `${BASE_URL}/image/placeholder.png`; // Fallback image từ backend
+                            e.target.onerror = null; // Prevent infinite loops
+                          }}
                         />
                       </div>
                     )}
@@ -456,7 +471,7 @@ const ChatbotOpenAI = ({ embedded = false }) => {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Type your message..."
+            placeholder="Nhập tin nhắn của bạn..."
             className="flex-1 border border-gray-300 rounded-l-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-yellow-500"
           />
           <button 

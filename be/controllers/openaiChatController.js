@@ -8,12 +8,15 @@ dotenv.config();
 
 // Cấu hình domain cho frontend
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+// Cấu hình domain cho backend - thêm địa chỉ backend API 
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8000';
 
 // Log OpenAI configuration state
 console.log("OpenAI Controller loaded!");
 console.log("OPENAI_API_KEY exists:", !!process.env.OPENAI_API_KEY);
 console.log("OPENAI_API_KEY length:", process.env.OPENAI_API_KEY ? process.env.OPENAI_API_KEY.length : 0);
 console.log("Using frontend URL:", FRONTEND_URL);
+console.log("Using backend URL for images:", BACKEND_URL);
 
 // Initialize OpenAI client with more detailed error handling
 let openai;
@@ -157,120 +160,157 @@ const searchProductsHelper = async (type = null, material = null, priceRange = n
         "name", 
         "price", 
         "productDescription",
-        "images"
+        "images",
+        "jewelryType",
+        "material"
       ],
-      limit: 3 // Limit to 3 results as recommended
+      limit: 3 // Limit to 3 results
     });
 
-    // Nếu không tìm thấy sản phẩm nào, trả về sản phẩm mẫu phù hợp với filters
+    // Nếu không tìm thấy sản phẩm nào, tìm kiếm các sản phẩm liên quan
     if (products.length === 0) {
-      console.log("No products found in database, using sample data with filters:", { type, material, priceRange, style });
+      console.log("No products found with exact filters, searching for related products");
       
-      // Tạo sản phẩm mẫu dựa trên filters
-      const sampleProducts = [];
+      // Tìm kiếm các sản phẩm liên quan bằng cách nới lỏng điều kiện tìm kiếm
+      // Ví dụ: nếu tìm nhẫn bạc không có, thì tìm các loại nhẫn hoặc các sản phẩm bạc khác
+      const relatedWhereClause = {};
       
-      // Ưu tiên cho nhẫn bạc nếu yêu cầu là nhẫn bạc
-      if (isSilverRingQuery) {
-        sampleProducts.push({
-          name: "Nhẫn Bạc 925",
-          description: "Nhẫn bạc 925 thiết kế hiện đại, tinh tế và thanh lịch, phù hợp cho cả nam và nữ.",
-          price: 1200000,
-          link: `${FRONTEND_URL}/product/2`,
-          image: "/image/products/nhan-bac-925.jpg"
-        });
-        return sampleProducts;
+      if (type) {
+        relatedWhereClause[Op.or] = [
+          { jewelryType: type }
+        ];
       }
       
-      // Nhẫn vàng
-      if ((type === null || type === "nhẫn" || type === "ring") && 
-          (material === null || material === "vàng" || material === "gold")) {
-        sampleProducts.push({
-          name: "Nhẫn Vàng 18k",
-          description: "Nhẫn vàng 18k với thiết kế tinh tế và sang trọng, phù hợp cho các sự kiện đặc biệt và làm quà tặng ý nghĩa.",
-          price: 9700000,
-          link: `${FRONTEND_URL}/product/1`,
-          image: "/image/products/nhan-vang-18k.jpg"
-        });
+      if (material) {
+        if (relatedWhereClause[Op.or]) {
+          relatedWhereClause[Op.or].push({ material: material });
+        } else {
+          relatedWhereClause[Op.or] = [{ material: material }];
+        }
       }
       
-      // Nhẫn bạc - logic cải tiến để phát hiện tốt hơn
-      if ((type === null || type === "nhẫn" || type === "nhân" || type === "ring") && 
-          (material === null || material === "bạc" || material === "silver")) {
-        sampleProducts.push({
-          name: "Nhẫn Bạc 925",
-          description: "Nhẫn bạc 925 thiết kế hiện đại, tinh tế và thanh lịch, phù hợp cho cả nam và nữ.",
-          price: 1200000,
-          link: `${FRONTEND_URL}/product/2`,
-          image: "/image/products/nhan-bac-925.jpg"
+      // Nếu không có điều kiện nới lỏng, lấy một số sản phẩm nổi bật
+      const relatedProducts = relatedWhereClause[Op.or] ? 
+        await Product.findAll({
+          where: relatedWhereClause,
+          attributes: [
+            "productID", 
+            "name", 
+            "price", 
+            "productDescription",
+            "images",
+            "jewelryType",
+            "material"
+          ],
+          limit: 3
+        }) : 
+        await Product.findAll({
+          attributes: [
+            "productID", 
+            "name", 
+            "price", 
+            "productDescription",
+            "images",
+            "jewelryType",
+            "material"
+          ],
+          limit: 3
         });
+      
+      // Nếu vẫn không tìm thấy sản phẩm nào, trả về mảng rỗng
+      if (relatedProducts.length === 0) {
+        return [];
       }
       
-      // Dây chuyền vàng
-      if ((type === null || type === "dây chuyền" || type === "necklace") && 
-          (material === null || material === "vàng" || material === "gold")) {
-        sampleProducts.push({
-          name: "Dây Chuyền Vàng 24k",
-          description: "Dây chuyền vàng 24k với thiết kế tinh xảo, sang trọng và đẳng cấp.",
-          price: 25000000,
-          link: `${FRONTEND_URL}/product/3`,
-          image: "/image/products/day-chuyen-vang-24k.jpg"
-        });
-      }
-      
-      // Dây chuyền bạc
-      if ((type === null || type === "dây chuyền" || type === "necklace") && 
-          (material === null || material === "bạc" || material === "silver")) {
-        sampleProducts.push({
-          name: "Dây Chuyền Bạc 925",
-          description: "Dây chuyền bạc 925 thiết kế hiện đại, tinh tế và thanh lịch, phù hợp cho cả nam và nữ.",
-          price: 2500000,
-          link: `${FRONTEND_URL}/product/4`,
-          image: "/image/products/day-chuyen-bac-925.jpg"
-        });
-      }
-      
-      // Bông tai kim cương
-      if ((type === null || type === "bông tai" || type === "earring") && 
-          (material === null || material === "vàng" || material === "gold")) {
-        sampleProducts.push({
-          name: "Bông Tai Kim Cương",
-          description: "Bông tai kim cương với thiết kế tinh xảo, sang trọng và đẳng cấp.",
-          price: 15000000,
-          link: `${FRONTEND_URL}/product/5`,
-          image: "/image/products/bong-tai-kim-cuong.jpg"
-        });
-      }
-      
-      // Nếu không có sản phẩm nào phù hợp, hiển thị mặc định
-      if (sampleProducts.length === 0) {
-        sampleProducts.push({
-          name: "Nhẫn Vàng 18k",
-          description: "Nhẫn vàng 18k với thiết kế tinh tế và sang trọng.",
-          price: 9700000,
-          link: `${FRONTEND_URL}/product/1`,
-          image: "/image/products/nhan-vang-18k.jpg"
-        });
-        
-        sampleProducts.push({
-          name: "Dây Chuyền Bạc 925",
-          description: "Dây chuyền bạc 925 thiết kế hiện đại và thanh lịch.",
-          price: 2500000,
-          link: `${FRONTEND_URL}/product/4`,
-          image: "/image/products/day-chuyen-bac-925.jpg"
-        });
-      }
-      
-      return sampleProducts.slice(0, 3);
+      // Format response with complete image URLs for related products
+      return relatedProducts.map(product => {
+        // Handle image paths - parse JSON if needed
+        let imagePath = null;
+        try {
+          // Try to parse images as JSON if it's a string
+          let imageArray = product.images;
+          if (typeof product.images === 'string') {
+            try {
+              imageArray = JSON.parse(product.images);
+            } catch (e) {
+              // If can't parse as JSON, treat as string
+              imageArray = [product.images];
+            }
+          }
+          
+          // Get first image from array or use direct string
+          const imageSrc = Array.isArray(imageArray) && imageArray.length > 0 
+            ? imageArray[0] 
+            : (typeof imageArray === 'string' ? imageArray : null);
+            
+          if (imageSrc) {
+            if (imageSrc.startsWith('http')) {
+              imagePath = imageSrc;
+            } else if (imageSrc.startsWith('/image')) {
+              imagePath = `${BACKEND_URL}${imageSrc}`;
+            } else {
+              imagePath = `${BACKEND_URL}/image/${imageSrc}`;
+            }
+          }
+        } catch (error) {
+          console.error("Error processing image path:", error);
+        }
+
+        return {
+          name: product.name,
+          description: product.productDescription + " (Sản phẩm liên quan)",
+          price: product.price,
+          link: `${FRONTEND_URL}/product/${product.productID}`,
+          image: imagePath,
+          isRelated: true
+        };
+      });
     }
 
-    // Format response
-    return products.map(product => ({
-      name: product.name,
-      description: product.productDescription,
-      price: product.price,
-      link: `${FRONTEND_URL}/product/${product.productID}`,
-      image: product.images && product.images.length > 0 ? product.images[0] : null
-    }));
+    // Format response with complete image URLs
+    return products.map(product => {
+      // Handle image paths - parse JSON if needed
+      let imagePath = null;
+      try {
+        // Try to parse images as JSON if it's a string
+        let imageArray = product.images;
+        if (typeof product.images === 'string') {
+          try {
+            imageArray = JSON.parse(product.images);
+          } catch (e) {
+            // If can't parse as JSON, treat as string
+            imageArray = [product.images];
+          }
+        }
+        
+        // Get first image from array or use direct string
+        const imageSrc = Array.isArray(imageArray) && imageArray.length > 0 
+          ? imageArray[0] 
+          : (typeof imageArray === 'string' ? imageArray : null);
+          
+        if (imageSrc) {
+          if (imageSrc.startsWith('http')) {
+            imagePath = imageSrc;
+          } else if (imageSrc.startsWith('/image')) {
+            imagePath = `${BACKEND_URL}${imageSrc}`;
+          } else {
+            imagePath = `${BACKEND_URL}/image/${imageSrc}`;
+          }
+        }
+      } catch (error) {
+        console.error("Error processing image path:", error);
+      }
+
+      return {
+        name: product.name,
+        description: product.productDescription,
+        price: product.price,
+        link: `${FRONTEND_URL}/product/${product.productID}`,
+        image: imagePath,
+        type: product.jewelryType,
+        material: product.material
+      };
+    });
   } catch (error) {
     console.error("Product search error:", error);
     return [];
@@ -286,7 +326,7 @@ export const processMessage = async (req, res) => {
     if (!message) {
       return res.status(400).json({ 
         success: false, 
-        message: "Message is required" 
+        message: "Tin nhắn không được để trống" 
       });
     }
 
@@ -302,7 +342,7 @@ export const processMessage = async (req, res) => {
       console.error("OpenAI client not initialized. Check your API key configuration.");
       return res.status(500).json({
         success: false,
-        message: "OpenAI service is currently unavailable. Please check server configuration."
+        message: "Dịch vụ AI hiện không khả dụng. Vui lòng kiểm tra cấu hình máy chủ."
       });
     }
 
@@ -338,18 +378,20 @@ ${productContext}
 ${additionalInstructions}
 
 Your goals are:
+- ALWAYS respond in Vietnamese language
 - Understand the customer's emotions and needs based on their messages.
 - Suggest specific jewelry products from our catalog when appropriate, referencing them by ID and name.
 - Always include the full product URL (${FRONTEND_URL}/product/ID) when recommending products.
 - Be friendly, empathetic, and persuasive like an experienced sales advisor.
 - Keep your responses concise but helpful (2-3 sentences maximum).
 - Use emojis sparingly to make the conversation lively (max 1-2 per message).
-- Personalize your speech with "you" and "your" to make the customer feel important.
+- Personalize your speech with "bạn" to make the customer feel important.
 
 Important behaviors:
+- ALWAYS respond in Vietnamese - this is crucial
 - Always include the clickable URL to product pages when recommending items (e.g., ${FRONTEND_URL}/product/1).
 - Reference specific product IDs from our catalog when making recommendations.
-- If the customer says the product is "too expensive", suggest lower-priced alternatives.
+- If the customer says the product is "too expensive" ("quá đắt"), suggest lower-priced alternatives.
 - If the customer seems excited, provide gentle encouragement.
 - If the customer is hesitating, offer warm reassurance and propose alternatives.
 - Always focus only on jewelry and the store, avoid unrelated topics.
@@ -364,7 +406,7 @@ Return these filters in your response JSON for our product search system.
 
 Your response MUST use the following JSON format:
 {
-  "text": "Your response to the customer here",
+  "text": "Your response to the customer here in Vietnamese",
   "type": null or string,
   "material": null or string,
   "priceRange": null or array of two numbers,
@@ -387,10 +429,10 @@ Your response MUST use the following JSON format:
     // Call OpenAI API
     try {
       const completion = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
+        model: "gpt-4-turbo-preview", // Upgrading to GPT-4 for better Vietnamese responses, fallback will be automatic to 3.5-turbo if not available
         messages: messages,
         temperature: 0.7,
-        max_tokens: 300,
+        max_tokens: 500, // Increased token limit for Vietnamese responses which may be longer
         response_format: { type: "json_object" }
       });
 
@@ -406,7 +448,7 @@ Your response MUST use the following JSON format:
         if (!parsedResponse.text) {
           console.error("OpenAI response missing 'text' field:", aiResponse);
           parsedResponse = { 
-            text: "Hello! How can I help you find the perfect jewelry piece today?",
+            text: "Xin chào! Tôi có thể giúp bạn tìm kiếm món trang sức hoàn hảo hôm nay không?",
             type: parsedResponse.type || null,
             material: parsedResponse.material || null,
             priceRange: parsedResponse.priceRange || null,
@@ -416,7 +458,7 @@ Your response MUST use the following JSON format:
       } catch (error) {
         console.error("JSON parsing error:", error);
         parsedResponse = { 
-          text: "I'm here to help you find beautiful jewelry. What are you looking for today?",
+          text: "Tôi ở đây để giúp bạn tìm trang sức đẹp. Bạn đang tìm kiếm gì hôm nay?",
           type: null,
           material: null,
           priceRange: null,
@@ -456,15 +498,15 @@ Your response MUST use the following JSON format:
         console.error("Authentication error: Check your OpenAI API key");
         return res.status(500).json({
           success: false,
-          message: "OpenAI authentication failed. Please check your API key configuration.",
-          error: "Authentication error"
+          message: "Xác thực OpenAI thất bại. Vui lòng kiểm tra cấu hình khóa API.",
+          error: "Lỗi xác thực"
         });
       }
       
       // Return general error for other API issues
       return res.status(500).json({
         success: false,
-        message: "Error processing your message with AI service",
+        message: "Lỗi xử lý tin nhắn với dịch vụ AI",
         error: openaiError.message
       });
     }
@@ -473,7 +515,7 @@ Your response MUST use the following JSON format:
     console.error("OpenAI Chatbot general error:", error);
     res.status(500).json({ 
       success: false, 
-      message: "Error processing your message",
+      message: "Lỗi xử lý tin nhắn của bạn",
       error: error.message
     });
   }

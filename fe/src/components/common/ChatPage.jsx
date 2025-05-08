@@ -60,10 +60,10 @@ const ChatPage = ({ minimized = false, onClose }) => {
 			console.log("Response from chatbot API:", response.data);
 			
 			// Create a response with products if available
-			let aiResponseText = "I found some items that might interest you!";
+			let aiResponseText = "Tôi đã tìm thấy một số sản phẩm có thể bạn sẽ thích!";
 			
 			if (!response.data.success || !response.data.products || response.data.products.length === 0) {
-				aiResponseText = "I couldn't find any products matching your criteria. Could you try a different search?";
+				aiResponseText = "Tôi không tìm thấy sản phẩm nào phù hợp với yêu cầu của bạn. Bạn có thể thử tìm kiếm khác không?";
 			}
 			
 			const aiResponse = {
@@ -82,7 +82,7 @@ const ChatPage = ({ minimized = false, onClose }) => {
 				...prevMessages,
 				{
 					id: Date.now() + 1,
-					text: 'Sorry, I encountered an error processing your request. Please try again later.',
+					text: 'Xin lỗi, đã xảy ra lỗi khi xử lý yêu cầu của bạn. Vui lòng thử lại sau.',
 					sender: 'ai',
 					isError: true,
 					timestamp: new Date().toISOString(),
@@ -103,9 +103,9 @@ const ChatPage = ({ minimized = false, onClose }) => {
 	}
 
 	const formatPrice = (price) => {
-		return new Intl.NumberFormat('en-US', {
+		return new Intl.NumberFormat('vi-VN', {
 			style: 'currency',
-			currency: 'USD'
+			currency: 'VND'
 		}).format(price);
 	};
 
@@ -115,7 +115,7 @@ const ChatPage = ({ minimized = false, onClose }) => {
 			<div className="bg-primary text-white p-4 flex justify-between items-center shadow-md">
 				<div className="flex items-center space-x-2">
 					<Bot size={24} />
-					<h1 className="text-xl font-semibold">Customer Support</h1>
+					<h1 className="text-xl font-semibold">Hỗ Trợ Khách Hàng</h1>
 				</div>
 				<div className="flex space-x-2">
 					<button
@@ -142,9 +142,9 @@ const ChatPage = ({ minimized = false, onClose }) => {
 				{messages.length === 0 ? (
 					<div className="flex flex-col items-center justify-center h-full text-gray-500">
 						<Bot size={48} className="mb-4" />
-						<p className="text-lg">How can I help you today?</p>
+						<p className="text-lg">Tôi có thể giúp gì cho bạn hôm nay?</p>
 						<p className="text-sm mt-2">
-							Type a message to start a conversation
+							Nhập tin nhắn để bắt đầu cuộc hội thoại
 						</p>
 					</div>
 				) : (
@@ -220,7 +220,7 @@ const ChatPage = ({ minimized = false, onClose }) => {
 							<div className="flex justify-start">
 								<div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex items-center space-x-2 text-gray-500">
 									<Loader2 size={18} className="animate-spin" />
-									<span>Thinking...</span>
+									<span>Đang suy nghĩ...</span>
 								</div>
 							</div>
 						)}
@@ -236,7 +236,7 @@ const ChatPage = ({ minimized = false, onClose }) => {
 						type="text"
 						value={input}
 						onChange={(e) => setInput(e.target.value)}
-						placeholder="Type your message..."
+						placeholder="Nhập tin nhắn của bạn..."
 						className="flex-grow p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
 						disabled={isLoading}
 					/>
