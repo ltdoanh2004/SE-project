@@ -44,14 +44,14 @@ const OrderList = () => {
 		<div className="container mx-auto px-4 py-8 max-w-6xl min-h-screen">
 			<div className="mb-6">
 				<Link to="/" className="text-gray-500 hover:text-gray-700">
-					Back
+					Quay lại trang chủ
 				</Link>
 			</div>
-			<h1 className="text-3xl font-bold mb-4 text-gray-800">View All Orders</h1>
+			<h1 className="text-3xl font-bold mb-4 text-gray-800">Toàn bộ đơn hàng</h1>
 
 			<div className="text-sm breadcrumbs mb-6 text-gray-500">
-				<span>Home</span> / <span>Order Tracking</span> /{' '}
-				<span className="text-gray-700">View All Orders</span>
+				<span>Trang chủ</span> / <span>Theo dõi đơn hàng</span> /{' '}
+				<span className="text-gray-700">Toàn bộ đơn hàng</span>
 			</div>
 
 			{loading ? (
@@ -72,15 +72,14 @@ const OrderList = () => {
 									</h2>
 									<div className="text-sm text-gray-500 flex justify-between items-center mb-2">
 										<div>
-											<div>Placed: {formatDate(order.date)}</div>
+											<div>Ngày mua: {formatDate(order.date)}</div>
 											{order.expectedDelivery && (
 												<div>
 													Expected: {formatDate(order.expectedDelivery) || ''}
 												</div>
 											)}
 										</div>
-										<div className="flex justify-end items-center mb-2">
-											<div className="text-sm text-gray-600">Status:</div>
+										<div className="flex justify-center items-center mb-2">
 											<Badge
 												color={getStatusColor(
 													order.isPaid && order.cancel
@@ -96,14 +95,14 @@ const OrderList = () => {
 														? 'cancelled'
 														: 'unpaid'
 												}
-												className="px-2 "
+												className="px-2 mt-2"
 											/>
 										</div>
 									</div>
 								</div>
 
 								<div className="flex justify-start items-center mb-4">
-                                    <div className="text-sm text-gray-600 mr-2">Price:</div>
+                                    <div className="text-sm text-gray-600 mr-2">Giá:</div>
 									<div className="font-semibold text-gray-800">
 										{(order.money || 0).toLocaleString()} VND
 									</div>
@@ -114,14 +113,14 @@ const OrderList = () => {
 										to={`/orders/${order.orderID}`}
 										className="text-blue-600 hover:text-blue-800 text-sm font-medium"
 									>
-										View
+										Xem chi tiết	
 									</Link>
 								</div>
 							</div>
 						))
 					) : (
 						<div className="col-span-full text-center py-12 text-gray-500">
-							You haven't placed any orders yet.
+							Bạn chưa có đơn hàng nào.
 						</div>
 					)}
 				</div>

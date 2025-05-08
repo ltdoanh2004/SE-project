@@ -1,4 +1,4 @@
-import { Op } from "sequelize";
+import { Op, literal } from "sequelize";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import Product from "../models/Product.js";
@@ -176,24 +176,21 @@ export const getByJewelry = async (req, res) => {
             if (jewelry.brand) whereClause.brand = jewelry.brand;
             if (jewelry.collection) whereClause.collection = jewelry.collection;
             if (jewelry.price) {
-                if (jewelry.price.min && jewelry.price.max) {
-                    // Cả min và max đều có
-                    whereClause.price = {
-                        [Op.between]: [
-                            parseFloat(jewelry.price.min),
-                            parseFloat(jewelry.price.max)
-                        ],
-                    };
-                } else if (jewelry.price.min) {
-                    // Chỉ có min
-                    whereClause.price = {
-                        [Op.gte]: parseFloat(jewelry.price.min),
-                    };
-                } else if (jewelry.price.max) {
-                    // Chỉ có max
-                    whereClause.price = {
-                        [Op.lte]: parseFloat(jewelry.price.max),
-                    };
+                const minPrice = parseFloat(jewelry.price.min);
+                const maxPrice = parseFloat(jewelry.price.max);
+            
+                const priceAfterDiscountExpr = `(price * (1 - discount / 100))`;
+                const conditions = [];
+            
+                if (!isNaN(minPrice)) {
+                    conditions.push(literal(`${priceAfterDiscountExpr} >= ${minPrice}`));
+                }
+                if (!isNaN(maxPrice)) {
+                    conditions.push(literal(`${priceAfterDiscountExpr} <= ${maxPrice}`));
+                }
+            
+                if (conditions.length > 0) {
+                    whereClause[Op.and] = conditions;
                 }
             }
         }
@@ -215,7 +212,7 @@ export const getByJewelry = async (req, res) => {
         name: product.name,
         price: product.price,
         image: product.images || [],
-        discount: product.discount || 0,
+        discount: product.discount,
         }));
 
         res.status(200).json({
@@ -241,7 +238,7 @@ export const getProductById = async (req, res) => {
         const product = await Product.findByPk(id, {
         attributes: [
             "productID", "name", "brand", "collection", "jewelryFit", 
-            "material", "price", "productDescription", "images"
+            "material", "price", "productDescription", "images", "discount"
         ]
         });
 
@@ -259,6 +256,7 @@ export const getProductById = async (req, res) => {
         price: product.price,
         productDescription: product.productDescription,
         image: product.images || [],
+        discount: product.discount,
         });
     } catch (error) {
         console.error(error);

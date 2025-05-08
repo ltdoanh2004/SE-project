@@ -1,25 +1,37 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { AuthProvider } from '../components/provider/provider'
 import { OrderService } from '../services/order/OrderService'
+import { Banknote } from 'lucide-react' // Import an icon for cash payment
 
 const Checkout = () => {
-	const cartItems = useSelector((state) => state.cart.items)
-	console.log(cartItems)
+	const location = useLocation()
+	const cartItems = location?.state?.product
+		? [location?.state.product]
+		: useSelector((state) => state.cart.items)
+	console.log(location?.state?.discountedPrice)
 
 	// State cho contact info
 	const [contactName, setContactName] = useState('')
 	const [contactNumber, setContactNumber] = useState('')
 	const [billingAddress, setBillingAddress] = useState('')
-	const [paymentMethod, setPaymentMethod] = useState('momo')
+	const [paymentMethod, setPaymentMethod] = useState('cod')
+	const discountPercent = 0
+
+	// Add shipping fee
 
 	const subtotal = cartItems.reduce(
-		(total, item) => total + item.price * (item.quantity || 1),
+		(total, item) =>
+			total +
+			(location?.state?.discountedPrice
+				? location?.state?.discountedPrice
+				: item.price) *
+				(item.quantity || 1),
 		0,
 	)
-	const taxes = subtotal * 0.1
-	const total = subtotal + taxes
+	const discount = subtotal * discountPercent
+	const total = subtotal - discount
 	const { isAuth } = useContext(AuthProvider)
 	const navigate = useNavigate()
 
@@ -28,27 +40,54 @@ const Checkout = () => {
 			const orderPayload = {
 				items: cartItems.map((item) => ({
 					productId: item.id,
-					quantity: item.quantity,
+					quantity: item.quantity || 1,
 				})),
 				paytype: paymentMethod,
 			}
-			await OrderService.creatOrder(orderPayload).then(async (res) => {
-				const orderID = res.orderID
-				if (paymentMethod === 'zalopay') {
-					await OrderService.payByZalo(orderID).then((res) => {
-						const payUrl = res.order_url
-						window.open(payUrl, '_blank')
+
+			// If payment method is COD, handle differently
+			if (paymentMethod === 'cod') {
+				try {
+					await OrderService.creatOrder(orderPayload).then((res) => {
+						navigate('/confirm', { state: { orderId: res.orderID } })
 						resolve()
 					})
+				} catch (error) {
+					console.error('Error creating COD order:', error)
+					reject(error)
 				}
-				if (paymentMethod === 'momo') {
-					await OrderService.payByMomo(orderID).then((res) => {
-						const payUrl = res.paymentUrl
-						window.open(payUrl, '_blank')
-						resolve()
-					})
-				}
-			})
+				return
+			}
+
+			// Handle online payment methods
+			await OrderService.creatOrder(orderPayload)
+				.then(async (res) => {
+					console.log(res)
+					if (res.status === 400) {
+						reject(res)
+						return
+					}
+					const orderID = res.orderID
+					if (paymentMethod === 'zalopay') {
+						await OrderService.payByZalo(orderID).then((res) => {
+							const payUrl = res.order_url
+							window.open(payUrl, '_blank')
+							resolve()
+						})
+					}
+					if (paymentMethod === 'momo') {
+						await OrderService.payByMomo(orderID).then((res) => {
+							const payUrl = res.paymentUrl
+							window.open(payUrl, '_blank')
+							resolve()
+						})
+					}
+				})
+				.catch((error) => {
+					console.error('Error creating order:', error)
+				})
+		}).catch((error) => {
+			alert('Có lỗi xảy ra trong quá trình thanh toán. Vui lòng thử lại sau.')
 		})
 	}
 	if (!isAuth) {
@@ -180,11 +219,16 @@ const Checkout = () => {
 									<h6 className="font-semibold uppercase text-gray-600">
 										{item.name}
 									</h6>
-									<p className="text-gray-400">x {item.quantity}</p>
+									<p className="text-gray-400">x {item.quantity || 1}</p>
 								</div>
 								<div>
 									<span className="font-semibold text-gray-600 text-xl">
-										{Number(item.price).toLocaleString()} VND
+										{Number(
+											location?.state?.discountedPrice 
+												? location.state.discountedPrice
+												: item.price,
+										).toLocaleString()}{' '}
+										VND
 									</span>
 								</div>
 							</div>
@@ -217,10 +261,14 @@ const Checkout = () => {
 									{subtotal.toLocaleString()} VND
 								</span>
 							</div>
+							<div className="flex justify-between mb-3">
+								<span className="text-gray-600">Phí vận chuyển</span>
+								<span className="font-semibold">Miễn phí</span>
+							</div>
 							<div className="flex justify-between">
-								<span className="text-gray-600">Thuế (10%)</span>
+								<span className="text-gray-600">Giảm giá</span>
 								<span className="font-semibold">
-									{taxes.toLocaleString()} VND
+									{discount.toLocaleString()} %
 								</span>
 							</div>
 						</div>
@@ -280,6 +328,33 @@ const Checkout = () => {
 								Phương thức thanh toán
 							</h3>
 
+							{/* Cash on Delivery */}
+							<div className="border-b border-gray-200 pb-4 mb-4">
+								<label className="flex items-center cursor-pointer">
+									<input
+										type="radio"
+										name="payment"
+										value="cod"
+										checked={paymentMethod === 'cod'}
+										onChange={() => setPaymentMethod('cod')}
+										className="form-radio h-5 w-5 text-green-500"
+									/>
+									<div className="ml-3 flex items-center">
+										<div className="bg-green-100 p-2 rounded-full mr-2">
+											<Banknote size={20} className="text-green-600" />
+										</div>
+										<span className="font-medium text-gray-700">
+											Thanh toán khi nhận hàng
+										</span>
+									</div>
+								</label>
+								{paymentMethod === 'cod' && (
+									<div className="mt-3 ml-8 text-sm text-gray-600">
+										<p>Thanh toán bằng tiền mặt khi đơn hàng được giao đến</p>
+									</div>
+								)}
+							</div>
+
 							{/* Momo */}
 							<div className="border-b border-gray-200 pb-4 mb-4">
 								<label className="flex items-center cursor-pointer">
@@ -302,7 +377,7 @@ const Checkout = () => {
 								</label>
 								{paymentMethod === 'momo' && (
 									<div className="mt-3 ml-8 text-sm text-gray-600">
-										<p>	Liên kết ví Momo để thanh toán nhanh chóng và an toàn</p>
+										<p>Liên kết ví Momo để thanh toán nhanh chóng và an toàn</p>
 									</div>
 								)}
 							</div>
@@ -335,12 +410,17 @@ const Checkout = () => {
 							</div>
 						</div>
 
-						{/* Pay Now Button */}
+						{/* Pay Now Button - Change text based on payment method */}
 						<button
 							onClick={handlePayNowClick}
-							className="w-full bg-indigo-500 hover:bg-indigo-700 text-white rounded-lg px-3 py-3 font-semibold"
+							className={`w-full ${
+								paymentMethod === 'cod'
+									? 'bg-green-600 hover:bg-green-700'
+									: 'bg-indigo-500 hover:bg-indigo-700'
+							} text-white rounded-lg px-3 py-3 font-semibold flex items-center justify-center`}
 						>
-							<i className="mdi mdi-lock-outline mr-1"></i> THANH TOÁN NGAY
+							<i className="mdi mdi-lock-outline mr-1"></i>
+							{paymentMethod === 'cod' ? 'ĐẶT HÀNG NGAY' : 'THANH TOÁN NGAY'}
 						</button>
 					</div>
 				</div>

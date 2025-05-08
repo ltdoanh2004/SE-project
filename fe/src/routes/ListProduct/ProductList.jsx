@@ -148,7 +148,15 @@ const ProductList = () => {
 
 	const handleAddToCart = (product) => {
 		console.log(product)
-		dispatch(addToCart(product))
+		// Create a modified product with the discounted price if available
+		const modifiedProduct = {
+			...product,
+			originalPrice: product.price,
+			price: product.discount
+				? calculateDiscountedPrice(product.price, product.discount)
+				: product.price,
+		}
+		dispatch(addToCart(modifiedProduct))
 		navigate('/cart')
 	}
 
@@ -159,6 +167,12 @@ const ProductList = () => {
 
 	const handleClickCard = (product) => {
 		navigate(`/product/${product.id}`)
+	}
+
+	// Calculate discounted price helper function
+	const calculateDiscountedPrice = (price, discount) => {
+		if (!discount) return price
+		return price - (price * discount) / 100
 	}
 
 	return (
@@ -283,7 +297,7 @@ const ProductList = () => {
 				</div>
 			</div>
 
-			<div className="flex-1">
+			<div className="flex-1 min-h-screen">
 				{loading ? (
 					<div className="flex justify-center items-center min-h-[400px]">
 						<LoadingSpinner />
@@ -322,15 +336,32 @@ const ProductList = () => {
 											}}
 										/>
 										<p style={{ margin: '10px 0' }}>{product.name}</p>
-										<p
-											style={{
-												fontWeight: 'bold',
-												color: '#C48C46',
-												margin: '10px 0',
-											}}
-										>
-											{new Number(product.price).toLocaleString()} VND
-										</p>
+										{/* Price display with discount */}
+										<div className="my-3">
+											{product.discount ? (
+												<div className="flex flex-wrap items-center justify-center gap-2">
+													<span className="text-gray-500 line-through">
+														{new Number(product.price).toLocaleString()} VND
+													</span>
+													<span className="bg-[#C48C46] text-white text-xs px-2 py-1 rounded">
+														-{product.discount}%
+													</span>
+													<span className="font-bold text-[#C48C46]">
+														{new Number(
+															calculateDiscountedPrice(
+																product.price,
+																product.discount,
+															),
+														).toLocaleString()}{' '}
+														VND
+													</span>
+												</div>
+											) : (
+												<p className="font-bold text-[#C48C46]">
+													{new Number(product.price).toLocaleString()} VND
+												</p>
+											)}
+										</div>
 										<Button
 											className="bg-primary hover:!bg-secondary text-black"
 											type="primary"

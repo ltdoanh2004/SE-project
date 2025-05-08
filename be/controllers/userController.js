@@ -123,7 +123,14 @@ export const forgetPassword = async (req, res) => {
             };
           
     
-        await transporter.sendMail(mailOptions);
+        try {
+            // Gửi mail
+            await transporter.sendMail(mailOptions);
+        } catch (error) {
+            console.error("Error sending email:", error);
+            return res.status(500).json({ message: "Failed to send confirmation email. Please try again later." });
+        }
+
         res.status(200).json({ message: "The confirmation email has been sent, please check your inbox!" });
     
     } catch (error) {
