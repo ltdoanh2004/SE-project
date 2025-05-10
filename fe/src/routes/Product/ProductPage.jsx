@@ -1,73 +1,92 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { use } from 'react';
-import { useDispatch } from 'react-redux';
-import { addToCart } from '../../redux/actions/cartActions';
+import React, { useState, useEffect } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import axios from 'axios'
+import { useDispatch } from 'react-redux'
+import { addToCart } from '../../redux/actions/cartActions'
+import CommentSection from '../ProductDetail/CommentSection' // ✅ Thêm dòng này
+import { use } from 'react'
 
 const ProductPage = () => {
-  const [product, setProduct] = useState(null);
-  const [quantity, setQuantity] = useState(1);
-  const [selectedSize, setSelectedSize] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+	const [product, setProduct] = useState(null)
+	const [quantity, setQuantity] = useState(1)
+	const [selectedSize, setSelectedSize] = useState(null)
+	const [loading, setLoading] = useState(true)
+	const [error, setError] = useState(null)
 
-  const location = useLocation();
-  const pathSegments = location.pathname.split('/').filter(Boolean);
-  const productId = pathSegments[pathSegments.length - 1];
-  const dispatch = useDispatch()
-  const navigate = useNavigate()
+	const location = useLocation()
+	const pathSegments = location.pathname.split('/').filter(Boolean)
+	const productId = pathSegments[pathSegments.length - 1]
+	const dispatch = useDispatch()
+	const navigate = useNavigate()
 
-  useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get(`http://localhost:8000/api/product/${productId}`);
-        setProduct(response.data);
-        console.log('Product data:', response.data);
-        setLoading(false);
-      } catch (err) {
-        console.error('Error fetching product:', err);
-        setError('Không tìm thấy sản phẩm.');
-        setLoading(false);
-      }
-    };
+	useEffect(() => {
+		const fetchProduct = async () => {
+			try {
+				setLoading(true)
+				const response = await axios.get(
+					`http://localhost:8000/api/product/${productId}`,
+				)
+				setProduct(response.data)
+				console.log('Product data:', response.data)
+				setLoading(false)
+			} catch (err) {
+				console.error('Error fetching product:', err)
+				setError('Không tìm thấy sản phẩm.')
+				setLoading(false)
+			}
+		}
 
-    fetchProduct();
-  }, [productId]);
+		fetchProduct()
+	}, [productId])
 
-  const handleIncrease = () => setQuantity((prev) => prev + 1);
-  const handleDecrease = () => {
-    if (quantity > 1) setQuantity((prev) => prev - 1);
-  };
-
-  if (loading) return <div className="text-center py-10">Đang tải sản phẩm...</div>;
-  if (error) return <div className="text-center py-10 text-red-500">{error}</div>;
-  if (!product) return null;
-
-  const formattedPrice = Number(product.price).toLocaleString('vi-VN');
-
-  const handleAddToCart =  () => {
-    const {id, image, name, price} = product
-    for(let i = 1; i <=quantity; i++){
-      dispatch(addToCart({ id, image, name, price }))
-    }
-    navigate('/cart')
-  }
-
-  const handleBuyNow = () => {
-	const {id, image, name, price} = product
-	for(let i = 1; i <=quantity; i++){
-	  dispatch(addToCart({ id, image, name, price }))
+	const handleIncrease = () => setQuantity((prev) => prev + 1)
+	const handleDecrease = () => {
+		if (quantity > 1) setQuantity((prev) => prev - 1)
 	}
-	navigate('/checkout', { state: { product } })
-  }
 
-  return (
+	if (loading)
+		return <div className="text-center py-10">Đang tải sản phẩm...</div>
+	if (error)
+		return <div className="text-center py-10 text-red-500">{error}</div>
+	if (!product) return null
+
+	const formattedPrice = Number(product.price).toLocaleString('vi-VN')
+
+	const handleAddToCart = () => {
+		const { id, image, name, price } = product
+		for (let i = 1; i <= quantity; i++) {
+			dispatch(addToCart({ id, image, name, price }))
+		}
+		navigate('/cart')
+	}
+
+	const handleBuyNow = () => {
+		const { id, image, name, price } = product
+		for (let i = 1; i <= quantity; i++) {
+			dispatch(addToCart({ id, image, name, price }))
+		}
+		navigate('/checkout', { state: { product, discountedPrice } })
+	}
+
+	// Calculate discounted price if discount exists
+	const hasDiscount = product.discount && product.discount > 0
+	const discountedPrice = hasDiscount
+		? product.price - product.price * (product.discount / 100)
+		: product.price
+
+	const formattedDiscountedPrice =
+		Number(discountedPrice).toLocaleString('vi-VN')
+
+	return (
 		<div className="w-full max-w-screen-xl mx-auto p-6 min-h-screen">
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 				{/* Hình ảnh sản phẩm */}
-				<div className="w-full h-[600px] flex items-center justify-center bg-gray-100">
+				<div className="w-full h-[600px] flex items-center justify-center bg-gray-100 relative">
+					{hasDiscount && (
+						<div className="absolute top-4 left-4 bg-primary text-white px-3 py-1 rounded-full text-sm font-semibold">
+							-{product.discount}%
+						</div>
+					)}
 					<img
 						src={
 							Array.isArray(product.image)
@@ -108,7 +127,18 @@ const ProductPage = () => {
 					</div>
 
 					{/* Giá sản phẩm */}
-					<p className="text-2xl font-semibold mt-10">{formattedPrice} VND</p>
+					{hasDiscount ? (
+						<div className="mt-10 flex flex-row gap-4 items-start">
+							<p className="text-xl line-through text-gray-500">
+								{formattedPrice} VND
+							</p>
+							<p className="text-2xl font-semibold text-primary">
+								{formattedDiscountedPrice} VND
+							</p>
+						</div>
+					) : (
+						<p className="text-2xl font-semibold mt-10">{formattedPrice} VND</p>
+					)}
 
 					<div className="mt-10">
 						<div className="flex items-center justify-between">
@@ -123,7 +153,10 @@ const ProductPage = () => {
 								</button>
 							</div>
 							{/* Nút mua hàng */}
-							<button className="w-[70%] bg-gray-300 opacity-90 hover:opacity-100 py-2 rounded-md" onClick={handleAddToCart}>
+							<button
+								className="w-[70%] bg-gray-300 opacity-90 hover:opacity-100 py-2 rounded-md"
+								onClick={handleAddToCart}
+							>
 								Thêm vào giỏ hàng
 							</button>
 						</div>
@@ -133,7 +166,7 @@ const ProductPage = () => {
 								backgroundColor: 'rgba(242, 219, 169, 1)',
 								color: '#000',
 							}}
-							onClick={handleAddToCart}
+							onClick={handleBuyNow}
 						>
 							Mua ngay
 						</button>
@@ -158,8 +191,11 @@ const ProductPage = () => {
 					<strong>Bộ sưu tập:</strong> {product.collection}
 				</p>
 			</div>
+
+			{/* ✅ Comment Section mới thêm */}
+			<CommentSection productId={product.id} />
 		</div>
 	)
-};
+}
 
-export default ProductPage;
+export default ProductPage

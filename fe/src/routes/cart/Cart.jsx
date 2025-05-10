@@ -22,9 +22,8 @@ const Cart = () => {
 		(total, item) => total + item.price * (item.quantity || 1),
 		0,
 	)
-	const deliveryFee = 30000
 	const discount = 0
-	const total = subtotal + deliveryFee - discount
+	const total = subtotal - discount
 
 	// Increase quantity
 	const handleIncrease = (id) => {
@@ -89,10 +88,10 @@ const Cart = () => {
 							to="/"
 							className="text-black-600 font-semibold hover:underline flex items-center gap-2"
 						>
-							<span className="text-lg">←</span> Back
+							<span className="text-lg">←</span> Trở về
 						</Link>
 						<h1 className="text-center font-bold text-2xl">
-							Your Shopping Cart
+							Giỏ hàng của bạn
 						</h1>
 						<div className="w-32"></div>
 					</div>
@@ -114,7 +113,7 @@ const Cart = () => {
 											htmlFor="select-all"
 											className="font-normal select-none cursor-pointer"
 										>
-											Select all
+											Chọn tất cả
 										</label>
 									</div>
 								</th>
@@ -213,7 +212,7 @@ const Cart = () => {
 					<div className="text-center mt-6 mb-10">
 						<input
 							type="text"
-							placeholder="Discount code"
+							placeholder="Mã giảm giá"
 							className="w-96 bg-transparent rounded-xl h-12 border border-gray-500 px-3 outline-none"
 						/>
 					</div>
@@ -228,7 +227,7 @@ const Cart = () => {
 					</div>
 					<div className="flex items-center py-1 justify-between font-semibold">
 						<p>Phí vận chuyển:</p>
-						<p>{deliveryFee.toLocaleString()} VND</p>
+						<p>Miễn phí</p>
 					</div>
 					<div className="flex items-center py-1 justify-between font-semibold">
 						<p>Tổng cộng:</p>
@@ -264,23 +263,23 @@ const Cart = () => {
 						>
 							X
 						</button>
-						<h2 className="text-2xl font-bold mb-4">Summary</h2>
+						<h2 className="text-2xl font-bold mb-4">Tóm tắt đơn hàng</h2>
 						<div className="space-y-4">
 							<div className="flex justify-between">
-								<p>Subtotal</p>
+								<p>Tạm tính</p>
 								<p>{subtotal.toLocaleString()} VND</p>
 							</div>
 							<div className="flex justify-between">
-								<p>Shipping</p>
-								<p>{deliveryFee.toLocaleString()} VND</p>
+								<p>Phí vận chuyển</p>
+								<p>Miễn phí</p>
 							</div>
 							<div className="flex justify-between">
-								<p>Tax</p>
-								<p>Included</p>
+								<p>Thuế</p>
+								<p>Đã bao gồm</p>
 							</div>
 							<hr />
 							<div className="flex justify-between font-bold text-lg">
-								<p>Total</p>
+								<p>Tổng cộng</p>
 								<p>{total.toLocaleString()} VND</p>
 							</div>
 						</div>
@@ -291,7 +290,7 @@ const Cart = () => {
 								handleGoToCheckout()
 							}}
 						>
-							Proceed to Checkout
+							Thực hiện thanh toán
 						</button>
 					</div>
 				</div>

@@ -1,4 +1,4 @@
-import { Op } from "sequelize";
+import { Op, literal } from "sequelize";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import Product from "../models/Product.js";
@@ -157,8 +157,7 @@ const cleanupUploadedFiles = (files) => {
 // Lấy sản phẩm theo các điều kiện lọc
 export const getByJewelry = async (req, res) => {
     try {
-        const { jewelryFit, jewelry, page } = req.body; // Lấy từ req.query thay vì req.body
-        console.log("Received request body:", req.body);
+        const { jewelryFit, jewelry, page } = req.body;
 
         // Lấy thông tin phân trang
         const pageNumber = parseInt(page?.number) || 1; 
@@ -172,21 +171,34 @@ export const getByJewelry = async (req, res) => {
         console.log("Where clause:", whereClause);
 
         if (jewelry) {
-        if (jewelry.type) whereClause.jewelryType = jewelry.type;
-        if (jewelry.material) whereClause.material = jewelry.material;
-        if (jewelry.brand) whereClause.brand = jewelry.brand;
-        if (jewelry.collection) whereClause.collection = jewelry.collection;
-        if (jewelry.price && jewelry.price.min && jewelry.price.max) {
-            whereClause.price = {
-            [Op.between]: [parseFloat(jewelry.price.min), parseFloat(jewelry.price.max)],
-            };
-        }
+            if (jewelry.type) whereClause.jewelryType = jewelry.type;
+            if (jewelry.material) whereClause.material = jewelry.material;
+            if (jewelry.brand) whereClause.brand = jewelry.brand;
+            if (jewelry.collection) whereClause.collection = jewelry.collection;
+            if (jewelry.price) {
+                const minPrice = parseFloat(jewelry.price.min);
+                const maxPrice = parseFloat(jewelry.price.max);
+            
+                const priceAfterDiscountExpr = `(price * (1 - discount / 100))`;
+                const conditions = [];
+            
+                if (!isNaN(minPrice)) {
+                    conditions.push(literal(`${priceAfterDiscountExpr} >= ${minPrice}`));
+                }
+                if (!isNaN(maxPrice)) {
+                    conditions.push(literal(`${priceAfterDiscountExpr} <= ${maxPrice}`));
+                }
+            
+                if (conditions.length > 0) {
+                    whereClause[Op.and] = conditions;
+                }
+            }
         }
 
         // Tìm kiếm sản phẩm với phân trang
         const { count, rows } = await Product.findAndCountAll({
         where: whereClause,
-        attributes: ["productID", "name", "price", "images"], 
+        attributes: ["productID", "name", "price", "images","discount"], 
         limit: limitNumber,
         offset: offset,
         });
@@ -200,6 +212,7 @@ export const getByJewelry = async (req, res) => {
         name: product.name,
         price: product.price,
         image: product.images || [],
+        discount: product.discount,
         }));
 
         res.status(200).json({
@@ -225,7 +238,7 @@ export const getProductById = async (req, res) => {
         const product = await Product.findByPk(id, {
         attributes: [
             "productID", "name", "brand", "collection", "jewelryFit", 
-            "material", "price", "productDescription", "images"
+            "material", "price", "productDescription", "images", "discount"
         ]
         });
 
@@ -243,6 +256,7 @@ export const getProductById = async (req, res) => {
         price: product.price,
         productDescription: product.productDescription,
         image: product.images || [],
+        discount: product.discount,
         });
     } catch (error) {
         console.error(error);

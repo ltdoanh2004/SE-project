@@ -99,7 +99,7 @@ export const forgetPassword = async (req, res) => {
         const { tokenID } = await Token.create({ token });
     
         // Gửi email với link xác nhận
-        const resetLink = `http://${process.env.HOST}:${process.env.PORT}/api/users/reset-password?tokenID=${tokenID}&token=${token}`;
+        const resetLink = `${process.env.BE_PUBLIC_URL}/api/users/reset-password?tokenID=${tokenID}&token=${token}`;
         const mailOptions = {
             from: process.env.EMAIL_USERNAME,
             to: email,
@@ -123,7 +123,14 @@ export const forgetPassword = async (req, res) => {
             };
           
     
-        await transporter.sendMail(mailOptions);
+        try {
+            // Gửi mail
+            await transporter.sendMail(mailOptions);
+        } catch (error) {
+            console.error("Error sending email:", error);
+            return res.status(500).json({ message: "Failed to send confirmation email. Please try again later." });
+        }
+
         res.status(200).json({ message: "The confirmation email has been sent, please check your inbox!" });
     
     } catch (error) {
@@ -140,7 +147,6 @@ export const resetPassword = async (req, res) => {
         console.log("Received tokenID:", tokenID);
         console.log("Received token:", token);
         if (!token || token === "null") {
-            await Token.destroy({ where: { tokenID } });
             return showError(res, "Invalid or expired token!");
         }
 
@@ -148,7 +154,6 @@ export const resetPassword = async (req, res) => {
         const tokenRecord = await Token.findOne({ where: { tokenID } });
 
         if (!tokenRecord || tokenRecord.token !== token) {
-            await Token.destroy({ where: { tokenID } });
             return showError(res, "Invalid or expired token!");
         }
 
@@ -171,10 +176,10 @@ export const resetPassword = async (req, res) => {
         const newPassword = crypto.randomBytes(6).toString("hex");
 
         // 5. Mã hóa mật khẩu nếu bạn dùng bcrypt
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        // const hashedPassword = await bcrypt.hash(newPassword, 10);
 
         // 6. Cập nhật mật khẩu mới trong DB
-        await User.update({ password: hashedPassword }, { where: { email } });
+        await User.update({ password: newPassword }, { where: { email } });
 
         // 7. Gửi mật khẩu mới qua email
         const mailOptions = {

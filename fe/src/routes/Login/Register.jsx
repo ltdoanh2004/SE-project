@@ -5,9 +5,9 @@ import { Link, useNavigate } from 'react-router-dom'
 import { registerUser } from '../../redux/actions/actionUser' // Adjust the import path as needed
 import Transition from '../../utils/Transition'
 import Logo from '../../assets/logo.png' // Adjust the import path as needed
-import {UserAuthenticationService} from '../../services/user/auth/userAuthentication'
-import {CookieService} from '../../utils/CookieService'
-import {TokenService} from '../../utils/tokenService'
+import { UserAuthenticationService } from '../../services/user/auth/userAuthentication'
+import { CookieService } from '../../utils/CookieService'
+import { TokenService } from '../../utils/tokenService'
 import { UserPublicInfoProvider } from '../../components/provider/provider'
 
 export default function RegisterPage() {
@@ -22,7 +22,9 @@ export default function RegisterPage() {
 	const [isLoading, setIsLoading] = useState(false)
 
 	const onSubmit = async (data) => {
-		// This assumes 'data' comes directly from react-hook-form and contains only email and password
+		setIsLoading(true)
+		setRegistrationError('')
+
 		try {
 			await UserAuthenticationService.signUp(data)
 				.then((res) => {
@@ -36,10 +38,31 @@ export default function RegisterPage() {
 				})
 				.catch((error) => {
 					console.log(error)
+					if (error.response) {
+						// Server responded with an error status
+						setRegistrationError(
+							error.response.data.message ||
+								'Registration failed. Please try again.',
+						)
+					} else if (error.request) {
+						// Request was made but no response
+						setRegistrationError(
+							'No response from server. Please check your connection and try again.',
+						)
+					} else {
+						// Something else happened
+						setRegistrationError(
+							'An error occurred during registration. Please try again.',
+						)
+					}
 				})
-			setIsLoading(true)
+				.finally(() => {
+					setIsLoading(false)
+				})
 		} catch (error) {
-			setRegistrationError(error.message)
+			console.error('Registration error:', error)
+			setRegistrationError('An unexpected error occurred. Please try again.')
+			setIsLoading(false)
 		}
 	}
 
@@ -95,8 +118,11 @@ export default function RegisterPage() {
 					)}
 					<input
 						type="submit"
-						className="w-full px-4 py-2 font-bold text-white bg-primary hover:cursor-pointer hover:bg-secondary rounded hover:bg-primary-dark focus:outline-none focus:shadow-outline"
-						value="Register"
+						className={`w-full px-4 py-2 font-bold text-white bg-primary hover:cursor-pointer hover:bg-secondary rounded focus:outline-none focus:shadow-outline ${
+							isLoading ? 'opacity-50 cursor-not-allowed' : ''
+						}`}
+						value={isLoading ? 'Registering...' : 'Register'}
+						disabled={isLoading}
 					/>
 				</form>
 				{registrationError && (

@@ -32,7 +32,7 @@ const Product = sequelize.define("Product", {
     allowNull: false,
   },
   jewelryType: {
-    type: DataTypes.ENUM('nhẫn', 'dây chuyền', 'bông tai', 'lắc', 'vòng'),
+    type: DataTypes.ENUM('nhẫn', 'dây chuyền', 'bông tai', 'vòng'),
     allowNull: true,
   },
   material: { 

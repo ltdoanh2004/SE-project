@@ -1,7 +1,7 @@
 import { useContext, useState } from 'react'
 import Logo from '../assets/logo.png'
 import NavLinks from '../components/Navbar/NavLinks'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import avatar from '../assets/image/banner2.png'
 import { Drawer } from 'vaul'
 
@@ -11,9 +11,9 @@ import {
 	CiShoppingCart,
 	CiUser,
 } from 'react-icons/ci'
-import { Search, ShoppingCart, MessageCircle } from 'lucide-react'
+import { Search, ShoppingCart, Palette } from 'lucide-react'
 import { AuthProvider, UserPublicInfoProvider } from './provider/provider'
-import {CookieService} from '../utils/CookieService'
+import { CookieService } from '../utils/CookieService'
 
 const UserItem = [
 	{ icon: <CiUser className="inline-block" />, path: '/account' },
@@ -24,19 +24,12 @@ const Header = () => {
 	const [open, setOpen] = useState(false)
 	const { isAuth, SetIsAuth } = useContext(AuthProvider)
 	const userName = localStorage.getItem('userName')
+	const navigate = useNavigate()
 	const handleLogOut = () => {
 		CookieService.removeCookie('token')
 		localStorage.removeItem('userName')
+		navigate('/')
 		window.location.reload()
-	}
-
-	// Function to open chat
-	const openChat = () => {
-		// Create and dispatch a custom event to trigger chat opening
-		const chatEvent = new CustomEvent('openJeifyChat', { 
-			detail: { source: 'header' } 
-		});
-		document.dispatchEvent(chatEvent);
 	}
 
 	return (
@@ -87,29 +80,24 @@ const Header = () => {
 											</span>
 											<div className="my-6 flex flex-col">
 												<Link
-													to={'/'}
-													className="hover:border-[1px] hover:shadow-sm px-4 py-2 hover:bg-primary hover:rounded-lg border-b-2"
-												>
-													Tài Khoản
-												</Link>
-												<Link
 													to={'/orders'}
 													className="hover:border-[1px] hover:shadow-sm px-4 py-2 hover:bg-primary hover:rounded-lg border-b-2"
 												>
 													Đơn Hàng
 												</Link>
 												<Link
-													to={'/'}
-													className="hover:border-[1px] hover:shadow-sm px-4 py-2 hover:bg-primary hover:rounded-lg border-b-2"
-												>
-													Yêu Thích
-												</Link>
-												<button
-													onClick={openChat}
+													to={'/jewelry'}
 													className="text-left hover:border-[1px] hover:shadow-sm px-4 py-2 hover:bg-primary hover:rounded-lg border-b-2"
 												>
-													Chat
-												</button>
+													Tùy Chỉnh Trang Sức
+												</Link>
+												<Link
+													to={'/changePassword'}
+													className="hover:border-[1px] hover:shadow-sm px-4 py-2 hover:bg-primary hover:rounded-lg border-b-2"
+												>
+													Đổi Mật Khẩu
+												</Link>
+
 												<button
 													onClick={(e) => {
 														e.preventDefault()
@@ -135,15 +123,15 @@ const Header = () => {
 								to="/login"
 								className="bg-white text-primary font-bold text-lg py-2 px-4 rounded"
 							>
-								Log in
+								Đăng nhập
 							</Link>
-							<button
-								onClick={openChat}
+							<Link
+								to="/jewelry"
 								className="bg-white text-primary font-bold text-lg py-2 px-4 rounded flex items-center gap-2"
 							>
-								<MessageCircle size={18} />
-								Chat
-							</button>
+								<Palette size={18} />
+								Tùy Chỉnh
+							</Link>
 						</li>
 					)}
 				</ul>
