@@ -82,14 +82,14 @@ const OrderList = () => {
 										<div className="flex justify-center items-center mb-2">
 											<Badge
 												color={getStatusColor(
-													order.isPaid && order.cancel
+													order.isPaid && !order.cancel
 														? 'paid'
 														: order.cancel
 														? 'cancelled'
 														: 'unpaid',
 												)}
 												count={
-													order.isPaid && order.cancel
+													order.isPaid && !order.cancel
 														? 'paid'
 														: order.cancel
 														? 'cancelled'

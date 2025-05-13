@@ -79,11 +79,8 @@ export default function Products() {
 		<div className="mx-auto w-[90vw]">
 			<div className="text-center my-12">
 				<h1 className="text-2xl font-normal text-yellow-600">
-					Top Accessories
+					Khám phá những tuyệt tác nghệ thuật
 				</h1>
-				<h2 className="md:text-lg text-sm text-gray-500 tracking-wider">
-					Enim praesent elementum facilisis leo vel
-				</h2>
 			</div>
 			<Slider {...settings}>
 				{products.map((product, index) => (

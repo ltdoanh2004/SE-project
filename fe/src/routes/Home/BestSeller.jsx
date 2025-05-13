@@ -6,7 +6,7 @@ const BestSeller = () => {
 		<div className="my-8 bg-[#fbf9f5]">
 			<div className="container mx-auto py-12 text-center">
 				<h1 className="text-2xl font-normal text-[#C6A969]">
-					Latest Collections
+					Bộ sưu tập mới nhất
 				</h1>
 				{/* <h2 className="md:text-4xl lg:text-5xl font-bold text-gray-500 mt-4 mb-10">
 					Spring Summer Clearance <br /> Women’s Sales
@@ -24,7 +24,7 @@ const BestSeller = () => {
 								<span className="text-gray-500 line-through ml-4">$298.00</span>
 							</div> */}
 							<button className="bg-[#C6A969] text-white font-bold py-3 px-8 rounded transition duration-300 hover:bg-[#C6A969]">
-								Shop Now
+								Mua Ngay
 							</button>
 						</div>
 					</div>

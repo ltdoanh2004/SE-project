@@ -71,14 +71,14 @@ const Checkout = () => {
 					if (paymentMethod === 'zalopay') {
 						await OrderService.payByZalo(orderID).then((res) => {
 							const payUrl = res.order_url
-							window.open(payUrl, '_blank')
+							window.location.href = payUrl // Open in same tab
 							resolve()
 						})
 					}
 					if (paymentMethod === 'momo') {
 						await OrderService.payByMomo(orderID).then((res) => {
 							const payUrl = res.paymentUrl
-							window.open(payUrl, '_blank')
+							window.location.href = payUrl // Open in same tab
 							resolve()
 						})
 					}
