@@ -39,15 +39,16 @@ const OrderDetail = () => {
 	const getCurrentStepIndex = () => {
 		if (order?.paymentMethod === 'processing' || !order?.isPaid) return 0
 		if (order?.products.some((p) => !p.shipped)) return 1
-		if (order?.products.every((p) => p.shipped) && !order.isDelivered) return 2
+		if (order?.products.every((p) => p.shipped) && !order.paymentMethod) return 2
 		return 3
 	}
 
 	const getStatusDisplay = () => {
 		if (order?.cancel) return 'Cancelled'
+		if (order?.paymentMethod === 'done') return 'Completed' // Handle "done" payment method
 		if (!order?.isPaid) return 'Awaiting Payment'
 		if (order?.products.some((p) => !p.shipped)) return 'Processing'
-		if (order?.products.every((p) => p.shipped) && !order.isDelivered)
+		if (order?.products.every((p) => p.shipped) && !order.paymentMethod)
 			return 'In Transit'
 		return 'Delivered'
 	}
@@ -215,13 +216,13 @@ const OrderDetail = () => {
 						},
 						{
 							title: 'Đang giao hàng',
-							description: order?.products.every((p) => p.shipped)
+							description: order?.products.every((p) => p.shipped) && order.paymentMethod !== 'done'
 								? formatDate(order.date)
 								: '',
 						},
 						{
 							title: 'Đã giao hàng',
-							description: order?.isDelivered
+							description: order?.paymentMethod === 'done'
 								? formatDate(order.deliveryDate)
 								: '',
 						},

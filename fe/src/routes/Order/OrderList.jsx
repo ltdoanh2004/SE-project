@@ -30,6 +30,8 @@ const OrderList = () => {
         return 'orange'
       case 'cancelled':
         return 'red'
+      case 'done': // New case for "done"
+        return 'blue'
       default:
         return 'gray'
     }
@@ -82,14 +84,18 @@ const OrderList = () => {
 										<div className="flex justify-center items-center mb-2">
 											<Badge
 												color={getStatusColor(
-													order.isPaid && !order.cancel
+													order.paymentMethod === 'done' // Check for "done" payment method first
+														? 'done'
+														: order.isPaid && !order.cancel
 														? 'paid'
 														: order.cancel
 														? 'cancelled'
 														: 'unpaid',
 												)}
 												count={
-													order.isPaid && !order.cancel
+													order.paymentMethod === 'done' // Check for "done" payment method first
+														? 'done'
+														: order.isPaid && !order.cancel
 														? 'paid'
 														: order.cancel
 														? 'cancelled'
