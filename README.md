@@ -126,5 +126,5 @@ This project is licensed under the MIT License.
 ## 📬 Contact
 
 Project Manager – Nguyễn Thành Nam  
-📧 ntnam.work@gmail.com  
+📧 ngthanhnam990@gmail.com
 📞 (+84) 368 075 139
